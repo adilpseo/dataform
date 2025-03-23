@@ -1,0 +1,67 @@
+config {
+  type: "table"
+}
+
+SELECT 
+  m.client_name,
+  -- m.Industry,
+  -- m.client_success_manager,
+  m.client_id,
+  c.id,
+  medium,
+  source,
+  answered,
+  campaign,
+  duration,
+  keywords,
+  call_type,
+  formatted_call_type,
+  direction,
+  recording_player,
+  company_id,
+  call_summary,
+  DATETIME(CAST(c.created_at AS TIMESTAMP), p.time_zone) created_at,
+  first_call,
+  utm_medium,
+  utm_source,
+  utm_campaign,
+  device_type,
+  lead_status,
+  prior_calls,
+  source_name,
+  total_calls,
+  customer_city,
+  customer_state,
+  customer_name,
+  customer_country,
+  customer_phone_number,
+  formatted_customer_location,
+  CONCAT("https://app.callrail.com/analytics/a/420424648/events/",c.person_id,"?event_id=",c.id,"&event_type=call") AS call_link,
+  JSON_EXTRACT_SCALAR(speaker_percent, "$.agent") AS agent_percent,
+  JSON_EXTRACT_SCALAR(speaker_percent, "$.customer") AS customer_percent,
+  keywords_spotted,
+  -- tag_names,
+  REGEXP_EXTRACT(p.script_url, r"/companies/(\d+)/") AS sid,
+  
+  CASE
+    WHEN REGEXP_CONTAINS(LOWER(source), 'google ad') AND NOT REGEXP_CONTAINS(LOWER(source), 'lsa') THEN 'Google Ads'
+    WHEN REGEXP_CONTAINS(LOWER(source), 'facebook') THEN 'Facebook'
+    WHEN   
+        REGEXP_CONTAINS(LOWER(source), 'lsa') 
+        OR (REGEXP_CONTAINS(LOWER(source), 'google') AND REGEXP_CONTAINS(LOWER(source), 'local'))
+        OR (REGEXP_CONTAINS(LOWER(source), 'local') AND REGEXP_CONTAINS(LOWER(source), 'service'))   
+        THEN 'Local Service Ads'
+    WHEN REGEXP_CONTAINS(TRIM(LOWER(source)), 'google my business') THEN 'Google My Business'
+    ELSE 'SEO'
+  END source_attribution,
+  
+  IF(
+        REGEXP_CONTAINS(LOWER(tag_names), 'qualified lead')
+        AND NOT REGEXP_CONTAINS(LOWER(tag_names), 'unqualified')
+    , 'Verified', 'Not Verified') is_verified_lead
+
+FROM callrail.Calls c
+LEFT JOIN ${"call_tags")} USING (id, company_id)
+JOIN ${ref("master_sheet")} m ON c.company_id = m.callrail_id
+JOIN callrail.Companies p ON c.company_id = p.id
+
