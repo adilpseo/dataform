@@ -25,6 +25,7 @@ WITH raw_contacts AS (
     customFields,
     dateUpdated,
     attributions,
+    companyName,
     ARRAY_TO_STRING(
     ARRAY(
       SELECT 
