@@ -76,7 +76,7 @@ contacts AS (
     lastNameRaw,
     profilePhoto
   FROM ${ref("ghl_contacts")} c 
-  JOIN $(ref("ghl_locations")} l ON c.locationId = l.id
+  JOIN ${ref("ghl_locations")} l ON c.locationId = l.id
 )
  
 SELECT *
