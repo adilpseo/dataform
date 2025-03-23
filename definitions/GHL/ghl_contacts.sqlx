@@ -1,0 +1,41 @@
+config {
+  type: "table"
+}
+
+WITH raw_contacts AS (
+  SELECT
+    id,
+    dnd,
+    city,
+    tags,
+    type,
+    email,
+    phone,
+    state,
+    country,
+    lastName,
+    timezone,
+    dateAdded,
+    firstName,
+    locationId,
+    postalCode,
+    contactName,
+    customFields,
+    dateUpdated,
+    -- lastActivity,
+    ARRAY_TO_STRING(
+    ARRAY(
+      SELECT 
+        JSON_EXTRACT_SCALAR(value, '$') 
+      FROM 
+        UNNEST(JSON_EXTRACT_ARRAY(tags, '$')) value
+    ), 
+    ','
+  ) AS tags_string,
+    _airbyte_extracted_at,
+    ROW_NUMBER() OVER(PARTITION BY id ORDER BY _airbyte_extracted_at DESC) rn
+  FROM ghl_data.Contacts 
+)
+SELECT * EXCEPT(rn)
+FROM raw_contacts
+WHERE rn = 1
