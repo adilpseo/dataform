@@ -18,7 +18,5 @@ SELECT
   gsc_property_id,
   gsc_name,
   gmb_location_id,
-  gmb_name,
-  ghl_id,
-  ghl_name
+  gmb_name
 FROM plumberseo.google_sheets.master_sheet
