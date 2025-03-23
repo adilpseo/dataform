@@ -1,0 +1,7 @@
+
+config {
+  type: "table"
+}
+
+SELECT * 
+FROM plumberseo.google_sheets.master_sheet
