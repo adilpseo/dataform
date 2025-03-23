@@ -1,0 +1,38 @@
+config {
+  type: "table"
+}
+
+WITH raw_opps AS (
+  SELECT
+    id,
+    name,
+    source,
+    status,
+    contact,
+    createdAt,
+    updatedAt,
+    pipelineId,
+    monetaryValue,
+    pipelineStageId,
+    pipelineStageUId,
+    lastStatusChangeAt,
+    lastStageChangeAt,
+    JSON_EXTRACT_SCALAR(contact, '$.email') AS contact_email,
+    JSON_EXTRACT_SCALAR(contact, '$.id') AS contact_id,
+    JSON_EXTRACT_SCALAR(contact, '$.name') AS contact_name,
+    JSON_EXTRACT_SCALAR(contact, '$.phone') AS contact_phone,
+    ARRAY_TO_STRING(
+    ARRAY(
+      SELECT JSON_EXTRACT_SCALAR(value, '$') 
+      FROM UNNEST(JSON_EXTRACT_ARRAY(contact, '$.tags')) value
+    ), 
+    ','
+    ) AS contact_tags,
+    _airbyte_extracted_at,
+    ROW_NUMBER() OVER(PARTITION BY id ORDER BY _airbyte_extracted_at DESC) rn
+  FROM ghl_data.Opportunities
+)
+
+SELECT *
+FROM raw_opps
+WHERE rn = 1

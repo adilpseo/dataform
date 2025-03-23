@@ -1,0 +1,16 @@
+config {
+  type: "table"
+}
+
+WITH raw_calendars AS (
+  SELECT
+    id,
+    name,
+    locationId,
+    _airbyte_extracted_at,
+    ROW_NUMBER() OVER(PARTITION BY id ORDER BY _airbyte_extracted_at DESC) rn
+  FROM ghl_data.Calendars
+)
+SELECT * EXCEPT(rn)
+FROM raw_calendars
+WHERE rn = 1

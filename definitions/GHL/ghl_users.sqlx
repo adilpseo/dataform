@@ -1,0 +1,20 @@
+config {
+  type: "table"
+}
+
+WITH raw_users AS (
+  SELECT
+    id,
+    name,
+    email,
+    phone,
+    JSON_EXTRACT_SCALAR(roles, "$.role") AS role,
+    JSON_EXTRACT_SCALAR(roles, "$.type") AS type,
+    deleted,
+    _airbyte_extracted_at,
+    ROW_NUMBER() OVER(PARTITION BY id ORDER BY _airbyte_extracted_at DESC) rn
+  FROM ghl_data.Users
+)
+SELECT * EXCEPT(rn)
+FROM raw_users
+WHERE rn = 1

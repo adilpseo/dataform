@@ -1,0 +1,22 @@
+config {
+  type: "table"
+}
+
+WITH raw_pipelines AS (
+  SELECT
+    p.id,
+    p.name,
+    p.stages,
+    o.locationId,
+    p._airbyte_extracted_at,
+    ROW_NUMBER() OVER(PARTITION BY p.id ORDER BY p._airbyte_extracted_at DESC) rn  
+  FROM ghl_data.Pipelines p
+  JOIN 
+    (SELECT pipelineId, locationId 
+      FROM ghl_data.Opportunities
+      GROUP BY pipelineId, locationId) o ON p.id = o.pipelineId
+)
+
+SELECT *
+FROM raw_pipelines
+WHERE rn = 1

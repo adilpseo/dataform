@@ -1,0 +1,29 @@
+config {
+  type: "table"
+}
+
+WITH calendars AS (
+  SELECT id, name AS CalendarName
+  FROM ${ref("ghl_calendars")}
+),
+
+raw_calendars_events AS (
+  SELECT
+    id,
+    title,
+    contactId,
+    startTime,
+    DATETIME(SUBSTR(startTime, 1, 19)) AS appt_startTime_local,
+    calendarId,
+    locationId,
+    appointmentStatus,
+    _airbyte_extracted_at,
+    ROW_NUMBER() OVER(PARTITION BY id ORDER BY _airbyte_extracted_at DESC) rn
+  FROM ghl_data.Calendar_Events
+)
+
+SELECT e.* EXCEPT( rn),
+  c.CalendarName
+FROM raw_calendars_events e 
+JOIN calendars c ON e.calendarId = c.id
+WHERE rn = 1

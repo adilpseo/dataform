@@ -1,0 +1,21 @@
+config {
+  type: "table"
+}
+
+WITH raw_custom_fields AS (
+  SELECT
+    id,
+    name,
+    dataType,
+    fieldKey,
+    position,
+    placeholder,
+    _airbyte_extracted_at,
+    ROW_NUMBER() OVER(PARTITION BY id ORDER BY _airbyte_extracted_at DESC) rn
+  FROM ghl_data.Custom_Fields 
+  WHERE TIMESTAMP_TRUNC(_airbyte_extracted_at, DAY) >= TIMESTAMP(DATE_ADD(CURRENT_DATE, INTERVAL -2 DAY))
+)
+
+SELECT * EXCEPT(rn)
+FROM raw_custom_fields
+WHERE rn = 1

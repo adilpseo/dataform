@@ -1,0 +1,21 @@
+config {
+  type: "table"
+}
+
+SELECT   
+  id,
+  city,
+  name,
+  email,
+  phone,
+  state,
+  social,
+  address,
+  country,
+  website,
+  business,
+  lastName,
+  timezone,
+  firstName,
+  postalCode  
+FROM ghl_master_conversionamp.Locations

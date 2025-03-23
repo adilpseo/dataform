@@ -1,0 +1,51 @@
+config {
+  type: "table"
+}
+
+WITH raw_messages AS (
+  SELECT 
+    id,
+    state,
+    company_id,
+    -- lead_status,
+    tracker_name,
+    formatted_customer_name,
+    formatted_customer_phone_number,
+    DATETIME(TIMESTAMP(last_message_at), company_time_zone) last_message_at,
+    
+    -- extract message from the JSON
+    JSON_VALUE(x, "$.content") AS message,
+    DATETIME(TIMESTAMP(JSON_VALUE(x, "$.created_at")), company_time_zone) AS message_created_at,
+    JSON_VALUE(x, "$.direction") AS message_direction,
+
+  FROM callrail.Text_Messages, UNNEST(JSON_QUERY_ARRAY(recent_messages)) AS x
+),
+
+cleaned_messages AS (
+  SELECT *,
+    TRIM(REGEXP_REPLACE(
+      REGEXP_REPLACE(message, r'^You have received a new message from a customer via Google Local Services Ads\. ', ''), 
+      r'(\n\s*)+', '\n'
+    )) AS cleaned_message,
+    ROW_NUMBER() OVER (PARTITION BY id) msg_number
+  FROM raw_messages
+  WHERE message NOT LIKE 'This customer requested only message replies%'
+),
+
+messages AS (
+  SELECT *
+  FROM cleaned_messages
+  WHERE REGEXP_CONTAINS(formatted_customer_name, 'Google Local Services Ads') OR msg_number = 1
+)
+
+SELECT 
+  m.client_name,
+  -- m.Industry,
+  -- m.client_success_manager,
+  m.client_id,
+
+  c.*
+
+FROM messages c
+LEFT JOIN ${ref("master_sheet")} m ON c.company_id = m.callrail_id
+

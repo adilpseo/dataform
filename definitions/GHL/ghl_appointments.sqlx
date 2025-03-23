@@ -1,0 +1,23 @@
+config {
+  type: "table"
+}
+
+WITH raw_appointments AS (
+  SELECT
+    id,
+    contactId,
+    title,
+    dateAdded,
+    startTime,
+    endTime,
+    calendarId,
+    locationId,
+    dateUpdated,
+    appointmentStatus,
+    _airbyte_extracted_at,
+    ROW_NUMBER() OVER(PARTITION BY id ORDER BY _airbyte_extracted_at DESC) rn
+  FROM ghl_data.Calendar_Events
+)
+SELECT * EXCEPT(rn)
+FROM raw_appointments
+WHERE rn = 1
