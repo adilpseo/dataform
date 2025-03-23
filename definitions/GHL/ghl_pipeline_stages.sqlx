@@ -1,5 +1,5 @@
 config {
-    type = "table"
+    type: "table"
 }
 
 WITH pipeline_data AS (
@@ -8,7 +8,7 @@ WITH pipeline_data AS (
     name as pipelineName,
     stage
   FROM
-    ${ref("glh_pipelines")}, 
+    ${ref("ghl_pipelines")}, 
     UNNEST(JSON_EXTRACT_ARRAY(stages)) AS stage
 )
 SELECT
