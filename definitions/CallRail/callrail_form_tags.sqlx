@@ -1,0 +1,18 @@
+config {
+  type: "table"
+}
+
+SELECT
+    id, 
+    company_id,
+    STRING_AGG(tag_name, ', ') AS tag_names
+
+FROM (
+    SELECT
+        id,company_id,
+        JSON_EXTRACT_SCALAR(tag, '$.name') AS tag_name
+    FROM callrail_forms.Form_Submissions,
+    UNNEST(JSON_EXTRACT_ARRAY(tags)) AS tag
+)
+
+GROUP BY id, company_id

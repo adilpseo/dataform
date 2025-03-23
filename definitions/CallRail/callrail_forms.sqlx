@@ -1,0 +1,65 @@
+config {
+  type: "table"
+}
+
+WITH form_messages AS (
+  SELECT id, 
+    JSON_EXTRACT_SCALAR(form_data, '$.MESSAGE') message1, 
+    JSON_EXTRACT_SCALAR(form_data, '$.Message') message2,
+    JSON_EXTRACT_SCALAR(form_data, '$.Why You Want to Be Part of Our Team') message3,
+    JSON_EXTRACT_SCALAR(form_data, '$.YOUR MESSAGE') message4,
+    JSON_EXTRACT_SCALAR(form_data, '$.Mesage') message5,
+    JSON_EXTRACT_SCALAR(form_data, '$.Detailed Service Requested') message6,
+    JSON_EXTRACT_SCALAR(form_data, '$.Why do you want to join the Relentless Digital Team') message7,    
+  FROM callrail_forms.Form_Submissions
+
+)
+
+SELECT
+  m.client_name,
+  -- m.Industry,
+  -- m.client_success_manager,
+  m.client_id,
+  f.id AS form_submission_id,
+  -- f.note,
+  f.medium,
+  f.source,
+  f.campaign,
+  f.form_url,
+  -- f.keywords,
+  f.referrer,
+  -- f.form_name,
+  f.company_id,
+  f.first_form,
+  -- f.utm_source,
+  -- f.utm_campaign,
+  -- f.utm_medium,
+  -- f.lead_status,
+  JSON_EXTRACT_SCALAR(f.form_data, "$.reason_for_your_visit") AS reason_for_your_visit,
+  DATETIME(CAST(f.submitted_at AS TIMESTAMP), p.time_zone) submitted_at,
+  f.formatted_customer_name customer_name,
+  f.customer_email,
+  f.formatted_customer_phone_number customer_phone_number,
+  CAST(t.tag_names AS STRING) tag_names,
+  REGEXP_EXTRACT(p.script_url, r"/companies/(\d+)/") AS sid,
+  CASE
+    WHEN REGEXP_CONTAINS(LOWER(source), 'google ad') AND NOT REGEXP_CONTAINS(LOWER(source), 'lsa') THEN 'Google Ads'
+    WHEN REGEXP_CONTAINS(LOWER(source), 'facebook') THEN 'Facebook'
+    WHEN   
+        REGEXP_CONTAINS(LOWER(source), 'lsa')
+        OR (REGEXP_CONTAINS(LOWER(source), 'google') AND REGEXP_CONTAINS(LOWER(source), 'local'))
+        OR (REGEXP_CONTAINS(LOWER(source), 'local') AND REGEXP_CONTAINS(LOWER(source), 'service'))   
+        THEN 'Local Service'
+    WHEN REGEXP_CONTAINS(TRIM(LOWER(source)), 'google my business') THEN 'Google My Business'
+    ELSE 'SEO'
+  END source_attribution,
+  IF(REGEXP_CONTAINS(LOWER(tag_names), 'qualified lead'), 'Verified', 'Not Verified') is_verified_lead,
+
+  -- form message
+  COALESCE(message1, message2, message3, message4, message5, message6, message7) AS form_message
+
+FROM callrail_forms.Form_Submissions AS f
+LEFT JOIN ${ref("callrail_form_tags")} t USING (id, company_id)
+JOIN ${ref("master_sheet")} m ON f.company_id = m.callrail_id
+JOIN callrail.Companies p ON f.company_id = p.id
+LEFT JOIN form_messages fm ON f.id = fm.id
