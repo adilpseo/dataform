@@ -3,5 +3,22 @@ config {
   type: "table"
 }
 
-SELECT * 
+SELECT 
+  client_id,
+  client_name,
+  PARSE_DATE('%Y/%m/%d', start_date) AS start_date,
+  ghl_id,
+  ghl_name,
+  ga_4_id AS ga4_id,
+  ga_4_name AS ga4_name,
+  callrail_id,
+  callrail_name,
+  google_ad_id,
+  google_ad_name,
+  gsc_property_id,
+  gsc_name,
+  gmb_location_id,
+  gmb_name,
+  ghl_id,
+  ghl_name
 FROM plumberseo.google_sheets.master_sheet
