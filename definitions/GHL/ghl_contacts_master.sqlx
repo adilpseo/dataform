@@ -63,8 +63,8 @@ contacts AS (
     firstName,
     lastName,
     timezone,
-    DATETIME(TIMESTAMP(dateAdded), "America/New_York") AS dateAdded_est,
-    DATETIME(TIMESTAMP(dateUpdated), "America/New_York") AS dateUpdated_est,
+    DATETIME(TIMESTAMP(dateAdded), l.timezone) AS dateAdded_local,
+    DATETIME(TIMESTAMP(dateUpdated), l.timezone) AS dateUpdated_local,
     dateAdded,
     dateUpdated,
     assignedTo,
@@ -75,7 +75,8 @@ contacts AS (
     firstNameRaw,
     lastNameRaw,
     profilePhoto
-  FROM relentless_ghl.Contacts
+  FROM ${ref("ghl_contacts")} c 
+  JOIN $(ref("ghl_locations")} l ON c.locationId = l.id
 )
  
 SELECT *
