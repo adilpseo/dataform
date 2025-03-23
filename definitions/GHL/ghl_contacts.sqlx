@@ -12,6 +12,8 @@ WITH raw_contacts AS (
     email,
     phone,
     state,
+    source,
+    assignedTo,
     country,
     lastName,
     timezone,
