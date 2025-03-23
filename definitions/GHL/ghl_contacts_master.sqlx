@@ -1,0 +1,86 @@
+WITH first_attribution AS (
+  SELECT
+    contactId,
+    utmSource AS first_attribution_utmSource,
+    utmMedium AS first_attribution_utmMedium,
+    utmContent AS first_attribution_utmContent,
+    medium AS first_attribution_medium,
+    utmSessionSource AS first_attribution_utmSessionSource
+  FROM ${ref('ghl_contact_attributions')}
+  WHERE isFirst = 'true'
+),
+
+last_attribution AS (
+  SELECT
+    contactId,
+    utmSource AS last_attribution_utmSource,
+    utmMedium AS last_attribution_utmMedium,
+    utmContent AS last_attribution_utmContent,
+    medium AS last_attribution_medium,
+    utmSessionSource AS last_attribution_utmSessionSource
+  FROM ${ref('ghl_contact_attributions')}
+  WHERE isLast = 'true'
+),
+
+-- all_tags AS (
+--   SELECT
+--     contactId,
+--     tag,
+--     CASE WHEN tag = 'main list' THEN TRUE END tag_main_list,
+--     CASE WHEN tag = 'epic 2024' THEN TRUE END tag_epic_2024,
+--     CASE WHEN tag = 'requested appointment from fb ad' THEN TRUE END tag_requested_appointment_from_fb_ad,
+--     CASE WHEN tag = 'lead - website form' THEN TRUE END tag_lead_website_form,
+--     CASE WHEN tag = 'lead' THEN TRUE END tag_lead,
+--     CASE WHEN tag = 'appt booked' THEN TRUE END tag_appt_booked,
+--   FROM ${ref('ghl_contact_tags')}
+
+-- ),
+
+-- tags_flattened AS (
+--   SELECT
+--     contactId,
+--     STRING_AGG(tag) tag_all,
+--     MAX(tag_main_list) tag_main_list,
+--     MAX(tag_epic_2024) tag_epic_2024,
+--     MAX(tag_requested_appointment_from_fb_ad) tag_requested_appointment_from_fb_ad,
+--     MAX(tag_lead_website_form) tag_lead_website_form,
+--     MAX(tag_lead) tag_lead,
+--     MAX(tag_appt_booked) tag_appt_booked,
+--   FROM all_tags
+--   GROUP BY contactId
+-- ),
+
+contacts AS (
+  SELECT
+    id AS contactId,
+    dnd,
+    city,
+    type,
+    email,
+    state,
+    source,
+    country,
+    firstName,
+    lastName,
+    timezone,
+    DATETIME(TIMESTAMP(dateAdded), "America/New_York") AS dateAdded_est,
+    DATETIME(TIMESTAMP(dateUpdated), "America/New_York") AS dateUpdated_est,
+    dateAdded,
+    dateUpdated,
+    assignedTo,
+    locationId,
+    postalCode,
+    companyName,
+    contactName,
+    firstNameRaw,
+    lastNameRaw,
+    profilePhoto
+  FROM relentless_ghl.Contacts
+)
+ 
+SELECT *
+FROM contacts
+LEFT JOIN first_attribution USING (contactId)
+LEFT JOIN last_attribution USING (contactId)
+-- LEFT JOIN tags_flattened USING (contactId)
+-- LEFT JOIN ${ref('ghl_contact_custom_fields_flattened')} USING (contactId)

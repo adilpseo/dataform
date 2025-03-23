@@ -22,7 +22,7 @@ WITH raw_contacts AS (
     contactName,
     customFields,
     dateUpdated,
-    -- lastActivity,
+    attributions,
     ARRAY_TO_STRING(
     ARRAY(
       SELECT 

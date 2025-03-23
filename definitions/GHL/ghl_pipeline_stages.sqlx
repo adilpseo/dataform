@@ -1,0 +1,23 @@
+config {
+    type = "table"
+}
+
+WITH pipeline_data AS (
+  SELECT
+    id AS pipelineId,  -- Adjust with your pipeline ID field
+    name as pipelineName,
+    stage
+  FROM
+    ${ref("glh_pipelines")}, 
+    UNNEST(JSON_EXTRACT_ARRAY(stages)) AS stage
+)
+SELECT
+  pipelineId,
+  pipelineName,
+  JSON_EXTRACT_SCALAR(stage, '$.id') AS stageId,
+  JSON_EXTRACT_SCALAR(stage, '$.name') AS stageName,
+  JSON_EXTRACT_SCALAR(stage, '$.position') AS stagePosition,
+  JSON_EXTRACT_SCALAR(stage, '$.showInFunnel') AS stageShowInFunnel,
+  JSON_EXTRACT_SCALAR(stage, '$.showInPieChart') AS stageShowInPieChart
+FROM
+  pipeline_data

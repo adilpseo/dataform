@@ -11,6 +11,7 @@ WITH raw_opps AS (
     contact,
     createdAt,
     updatedAt,
+    locationId,
     pipelineId,
     monetaryValue,
     pipelineStageId,
@@ -33,6 +34,25 @@ WITH raw_opps AS (
   FROM ghl_data.Opportunities
 )
 
-SELECT *
-FROM raw_opps
+SELECT 
+  r.id,
+  r.name,
+  r.source,
+  r.status,
+  r.pipelineId,
+  r.monetaryValue,
+  r.pipelineStageId,
+  r.contact_tags,
+  r.contact_id,
+  r.contact_email,
+  r.contact_name,
+  r.contact_phone,
+
+  DATETIME(TIMESTAMP(r.createdAt), l.timezone) AS createdAt,
+  DATETIME(TIMESTAMP(r.updatedAt), l.timezone) AS updatedAt,
+  DATETIME(TIMESTAMP(r.lastStageChangeAt), l.timezone) AS lastStageChangeAt,
+  DATETIME(TIMESTAMP(r.lastStatusChangeAt), l.timezone) AS lastStatusChangeAt,
+
+FROM raw_opps r 
+JOIN ${ref("ghl_locations")} l ON r.locationId = l.id
 WHERE rn = 1

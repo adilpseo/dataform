@@ -1,0 +1,30 @@
+config {
+  type: "table"
+}
+
+SELECT 
+  id AS contactId,
+  contactName,
+  JSON_VALUE(attr, '$.isFirst') AS isFirst,
+  JSON_VALUE(attr, '$.isLast') AS isLast,
+  JSON_VALUE(attr, '$.url') AS url,
+  JSON_VALUE(attr, '$.campaign') AS campaign,
+  JSON_VALUE(attr, '$.utmSource') AS utmSource,
+  JSON_VALUE(attr, '$.utmMedium') AS utmMedium,
+  JSON_VALUE(attr, '$.utmContent') AS utmContent,
+  JSON_VALUE(attr, '$.referrer') AS referrer,
+  JSON_VALUE(attr, '$.campaignId') AS campaignId,
+  JSON_VALUE(attr, '$.fbclid') AS fbclid,
+  JSON_VALUE(attr, '$.gclid') AS gclid,
+  JSON_VALUE(attr, '$.msclikid') AS msclikid,
+  JSON_VALUE(attr, '$.dclid') AS dclid,
+  JSON_VALUE(attr, '$.fbc') AS fbc,
+  JSON_VALUE(attr, '$.fbp') AS fbp,
+  JSON_VALUE(attr, '$.fbEventId') AS fbEventId,
+  JSON_VALUE(attr, '$.userAgent') AS userAgent,
+  JSON_VALUE(attr, '$.ip') AS ip,
+  JSON_VALUE(attr, '$.medium') AS medium,
+  JSON_VALUE(attr, '$.mediumId') AS mediumId,
+  JSON_VALUE(attr, '$.utmSessionSource') AS utmSessionSource
+FROM ${ref("ghl_contacts")}, 
+UNNEST(JSON_QUERY_ARRAY(attributions)) AS attr

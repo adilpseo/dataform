@@ -1,0 +1,37 @@
+config {
+    type: "table"
+}
+
+
+WITH custom_fields_data AS (
+  SELECT 
+    c.id AS contactId, 
+    c.contactName, 
+    cf.fieldKey, 
+    cf.dataType,
+    -- For regular fields, use JSON_VALUE to extract the value
+    JSON_VALUE(f.value) AS field_value,
+    -- For checkbox fields, use ARRAY_AGG to handle array values as strings
+    CASE
+      WHEN cf.dataType = 'CHECKBOX' THEN JSON_EXTRACT_SCALAR(element, '$')
+      ELSE JSON_VALUE(f.value)
+    END AS aggregated_field_value
+  FROM ${ref("ghl_contacts")} AS c,
+  UNNEST(JSON_QUERY_ARRAY(c.customFields)) AS f
+  LEFT JOIN ${ref("ghl_custom_fields")} AS cf 
+    ON JSON_VALUE(f, '$.id') = cf.id
+  -- Unnest the checkbox array to get each element as string
+  LEFT JOIN UNNEST(CASE 
+                    WHEN cf.dataType = 'CHECKBOX' 
+                    THEN JSON_EXTRACT_ARRAY(f.value)
+                    ELSE [] 
+                  END) AS element
+)
+
+SELECT
+  contactId,
+  fieldKey,
+  STRING_AGG(aggregated_field_value) field_value
+FROM custom_fields_data
+WHERE fieldKey IS NOT NULL
+GROUP BY contactId, fieldKey, dataType

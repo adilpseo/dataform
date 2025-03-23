@@ -1,0 +1,10 @@
+config {
+    type: "table"
+}
+
+SELECT 
+  id AS contactId,
+  contactName,
+  JSON_VALUE(tag) AS tag
+FROM ${ref("ghl_contacts")}, 
+UNNEST(JSON_QUERY_ARRAY(tags)) AS tag
