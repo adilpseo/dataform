@@ -61,7 +61,7 @@ SELECT
     , 'Verified', 'Not Verified') is_verified_lead
 
 FROM callrail.Calls c
-LEFT JOIN ${"call_tags")} USING (id, company_id)
+LEFT JOIN ${ref("call_tags")} USING (id, company_id)
 JOIN ${ref("master_sheet")} m ON c.company_id = m.callrail_id
 JOIN callrail.Companies p ON c.company_id = p.id
 
