@@ -54,7 +54,7 @@ contacts AS (
   SELECT
     c.id AS contactId,
     c.city,
-    type,
+    c.type,
     c.email,
     c.state,
     c.source,
@@ -62,16 +62,16 @@ contacts AS (
     c.firstName,
     c.lastName,
     c.timezone,
-    DATETIME(TIMESTAMP(dateAdded), l.timezone) AS dateAdded_local,
-    DATETIME(TIMESTAMP(dateUpdated), l.timezone) AS dateUpdated_local,
-    dateAdded,
-    dateUpdated,
+    DATETIME(TIMESTAMP(c.dateAdded), l.timezone) AS dateAdded_local,
+    DATETIME(TIMESTAMP(c.dateUpdated), l.timezone) AS dateUpdated_local,
+    c.dateAdded,
+    c.dateUpdated,
     c.assignedTo,
     c.locationId,
     c.postalCode,
     c.companyName,
-    contactName,
-    profilePhoto
+    c.contactName
+  
   FROM ${ref("ghl_contacts")} c 
   JOIN ${ref("ghl_locations")} l ON c.locationId = l.id
 )
