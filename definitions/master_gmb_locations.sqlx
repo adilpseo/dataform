@@ -2,9 +2,23 @@ config {
   type: "table"
 }
 
-SELECT
-  client_id,
-  domain_name,
-  id AS gmb_location_id,
-  title AS gmb_location_title
-FROM google_sheets.gmb_locations
+WITH clients AS (
+  SELECT 
+    client_id,
+    client_name,
+    start_date,
+    ghl_id
+  FROM ${ref("master_sheet")}
+),
+
+gmb_locations AS (
+  SELECT
+    client_id,
+    id AS gmb_location_id,
+    title AS gmb_location_title
+  FROM google_sheets.gmb_locations
+)
+
+SELECT *
+FROM gmb_locations
+JOIN clients USING (client_id)
