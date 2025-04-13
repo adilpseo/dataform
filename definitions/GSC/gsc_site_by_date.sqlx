@@ -1,0 +1,43 @@
+config {
+  type: "table"
+}
+
+WITH site_data AS (
+  SELECT
+    date,
+    REGEXP_REPLACE(NET.HOST(REPLACE(site, 'sc-domain:', '')), r'^www\.', '') AS gsc_site,
+    device,
+    clicks,
+    impressions,
+    ctr,
+    position
+  FROM google_search_console.site_report_by_site
+),
+
+clients AS (
+  SELECT 
+    client_id,
+    client_name,
+    start_date,
+    ghl_id,
+    gsc_name AS gsc_site
+  FROM ${ref("master_sheet")}
+  WHERE gsc_name IS NOT NULL
+),
+
+site_by_date AS (
+  SELECT
+    date,
+    gsc_site,
+    SUM(clicks) AS clicks,
+    SUM(impressions) AS impressions,
+    SUM(clicks) / SUM(impressions) AS avg_ctr,
+    AVG(position) AS avg_position
+
+  FROM site_data
+  GROUP BY date, gsc_site
+)
+
+SELECT *
+FROM site_by_date
+JOIN clients USING (gsc_site)
