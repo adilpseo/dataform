@@ -1,0 +1,39 @@
+
+
+WITH client_properties AS (
+  SELECT
+    client_id,
+    client_name,
+    start_date,
+    ghl_id,
+    CAST(ga4_id AS STRING) AS property,
+    ga4_name
+
+  FROM ${ref("master_sheet")}
+  WHERE ga4_id IS NOT NULL
+),
+
+ga_report AS (
+  SELECT
+    REPLACE(property, 'properties/', '') property,
+    date,
+    sessions,
+    engaged_sessions,
+    engagement_rate,
+    user_engagement_duration,
+
+    total_users,
+
+    event_count,
+    key_events,
+    events_per_session,
+
+    session_campaign_name,
+    total_revenue
+
+  FROM google_analytics_4.traffic_acquisition_session_campaign_report
+ )
+ 
+SELECT * 
+FROM ga_report
+JOIN client_properties USING(property)
