@@ -1,0 +1,43 @@
+config {
+  type: "table"
+}
+
+WITH accounts AS (
+  SELECT id, account_name
+  FROM google_business_profile.account
+)
+
+SELECT
+  p.account_id,
+  p.location_id,
+  p.id,
+  p.call_to_action_type,
+  p.topic_type,
+  p.call_to_action_url,
+  p.state,
+  p.summary,
+  DATETIME(p.create_time) create_time,
+  p.search_url,
+
+  a.account_name,
+  
+  g.client_id,
+  g.client_name,
+  g.ghl_id,
+
+  l.title,
+  l.storefront_address_locality,
+  l.storefront_address_administrative_area,
+  REGEXP_REPLACE(l.storefront_address_lines, r'[\[\]"]', '') AS full_address,
+  l.website_uri,
+  l.primary_category_name,
+  l.primary_category_display_name,
+  l.open_info_status
+
+FROM google_business_profile.local_post p
+LEFT JOIN ${ref("master_gmb_locations")} g ON g.gmb_location_id = p.location_id
+LEFT JOIN accounts a ON p.account_id = a.id
+LEFT JOIN google_business_profile.location l ON p.location_id = l.id
+WHERE 
+  l._fivetran_deleted IS FALSE
+  AND p._fivetran_deleted IS FALSE
