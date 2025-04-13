@@ -1,0 +1,66 @@
+config {
+  type: "table"
+}
+
+WITH accounts AS (
+  SELECT *
+  FROM google_ads.account_history
+  WHERE _fivetran_active IS TRUE
+),
+
+google_ad_accounts AS (
+  SELECT DISTINCT id AS customer_id, descriptive_name
+  FROM accounts
+),
+
+clients AS (
+  SELECT 
+    client_id,
+    client_name,
+    ghl_id,
+    start_date,
+    google_ad_id AS customer_id,
+    google_ad_name
+  FROM ${ref("master_sheet")}
+  WHERE google_ad_id IS NOT NULL
+),
+
+google_accounts_latest AS (
+  SELECT *
+  FROM google_ad_accounts 
+),
+
+google_campaigns AS (
+  SELECT 
+      id AS campaign_id,
+      customer_id,
+      advertising_channel_type, 
+      name AS campaign_name
+
+  FROM google_ads.campaign_history
+  WHERE _fivetran_active IS TRUE
+),
+
+compaign_stats AS (
+  SELECT
+    date,
+    customer_id,
+    id AS campaign_id,
+    SUM(SAFE_DIVIDE(cost_micros, 1000000)) AS ad_spend,
+    SUM(clicks) AS clicks,
+    SUM(impressions) AS impressions
+  FROM google_ads.campaign_stats
+  GROUP BY date, customer_id, id
+),
+
+google_ads_spend AS (
+  SELECT *
+  FROM compaign_stats cs 
+  JOIN google_campaigns gc USING(customer_id, campaign_id)
+)
+
+SELECT 
+   *
+FROM google_ads_spend AS gads
+LEFT JOIN google_ad_accounts ga USING(customer_id)
+LEFT JOIN clients c USING(customer_id)

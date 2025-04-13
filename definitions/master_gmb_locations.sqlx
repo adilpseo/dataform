@@ -1,0 +1,10 @@
+config {
+  type: "table"
+}
+
+SELECT
+  client_id,
+  domain_name,
+  id AS gmb_location_id,
+  title AS gmb_location_title
+FROM google_sheets.gmb_locations
