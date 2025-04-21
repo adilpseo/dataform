@@ -47,6 +47,7 @@ SELECT
   r.contact_email,
   r.contact_name,
   r.contact_phone,
+  r.locationId,
 
   DATETIME(TIMESTAMP(r.createdAt), l.timezone) AS createdAt,
   DATETIME(TIMESTAMP(r.updatedAt), l.timezone) AS updatedAt,
