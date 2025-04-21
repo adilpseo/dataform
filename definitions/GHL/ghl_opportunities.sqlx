@@ -64,5 +64,5 @@ FROM raw_opps r
 JOIN ${ref("ghl_locations")} l ON r.locationId = l.id
 JOIN ${ref("ghl_pipelines")} p ON r.pipelineId = p.id
 JOIN ${ref("master_sheet")} m ON r.locationId = m.ghl_id
-WHERE rn = 1
+WHERE r.rn = 1
 
