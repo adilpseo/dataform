@@ -47,11 +47,11 @@ SELECT
     WHEN REGEXP_CONTAINS(LOWER(source), 'google ad') AND NOT REGEXP_CONTAINS(LOWER(source), 'lsa') THEN 'Google Ads'
     WHEN REGEXP_CONTAINS(LOWER(source), 'facebook') THEN 'Facebook'
     WHEN   
-        REGEXP_CONTAINS(LOWER(source), 'lsa') 
-        OR (REGEXP_CONTAINS(LOWER(source), 'google') AND REGEXP_CONTAINS(LOWER(source), 'local'))
-        OR (REGEXP_CONTAINS(LOWER(source), 'local') AND REGEXP_CONTAINS(LOWER(source), 'service'))   
-        THEN 'Local Service Ads'
-    WHEN REGEXP_CONTAINS(TRIM(LOWER(source)), 'google my business') THEN 'Google My Business'
+        REGEXP_CONTAINS(LOWER(source), 'gls') THEN 'GLS'
+    WHEN 
+      (REGEXP_CONTAINS(TRIM(LOWER(source)), 'google my business')
+      OR REGEXP_CONTAINS(TRIM(LOWER(source)), 'google business profile'))
+     THEN 'GMB'
     ELSE 'SEO'
   END source_attribution,
   
