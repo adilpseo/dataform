@@ -1,4 +1,6 @@
-
+config {
+  type: "table"
+}
 
 WITH client_properties AS (
   SELECT
@@ -29,7 +31,9 @@ ga_report AS (
     events_per_session,
 
     session_campaign_name,
-    total_revenue
+    total_revenue,
+
+    ga4_name
 
   FROM google_analytics_4.traffic_acquisition_session_campaign_report
  )
