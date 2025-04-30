@@ -59,6 +59,8 @@ SELECT
   p.stagePosition,
   p.stageShowInFunnel,
 
+  l.name AS location_name,
+
   m.client_id,
   m.client_name,
 
