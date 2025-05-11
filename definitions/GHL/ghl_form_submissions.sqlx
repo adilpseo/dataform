@@ -21,10 +21,15 @@ SELECT
   f.name AS form_name,
   f.locationId,
   f.location_name,
-  JSON_VALUE(form_data, '$.eventData.source') AS source
+  JSON_VALUE(form_data, '$.eventData.source') AS source,
+
+  m.client_id,
+  m.client_name,
+  m.account_manager,
 
 FROM raw_data d
 LEFT JOIN ${ref('ghl_forms')} f ON d.formid = f.id
+LEFT JOIN ${ref('master_sheet')} m ON f.locationId = m.ghl_id
 WHERE rn = 1
 
 -- AND submission_id = '680948d121b7a629fd7fab3b'
