@@ -1,0 +1,30 @@
+config {
+  type: "table"
+}
+
+WITH raw_data AS (
+  SELECT
+    id AS submission_id,
+    name AS contact_name,
+    email AS contact_email,
+    formid,
+    others AS form_data,
+    contactId,
+    createdAt,
+    ROW_NUMBER() OVER (PARTITION BY id ORDER BY _airbyte_extracted_at DESC) rn
+  FROM ghl_data.Form_Submissions
+)
+
+SELECT
+  d.* EXCEPT(createdAt, rn),
+  DATETIME(TIMESTAMP(d.createdAt), f.timezone) AS submitted_at,
+  f.name AS form_name,
+  f.locationId,
+  f.location_name,
+  JSON_VALUE(form_data, '$.eventData.source') AS source
+
+FROM raw_data d
+LEFT JOIN ${ref('ghl_forms')} f ON d.formid = f.id
+WHERE rn = 1
+
+-- AND submission_id = '680948d121b7a629fd7fab3b'
