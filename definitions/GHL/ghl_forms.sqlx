@@ -1,0 +1,19 @@
+config {
+  type: "table"
+}
+
+WITH raw_forms AS (
+  SELECT
+    id,
+    name,
+    locationId,
+    ROW_NUMBER() OVER(PARTITION BY id ORDER BY _airbyte_extracted_at DESC) rn
+  FROM ghl_data.Forms
+)
+
+SELECT 
+  f.* EXCEPT(rn),
+  l.name AS location_name
+FROM raw_forms f
+JOIN ${ref('ghl_locations')} l ON f.locationId = l.id
+WHERE rn = 1
