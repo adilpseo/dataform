@@ -26,7 +26,7 @@ SELECT
   seo_management,
   ppc_management,
   est_lead_to_service_call_ratio,
-  es_average_per_booked_call_transaction_value,
+  es_average_per_booked_call_transaction_value AS est_average_per_booked_call_transaction_value,
   pseo_leads_ pseo_leads,
   csr_conversion_rate,
   technician_conversion_rate,
