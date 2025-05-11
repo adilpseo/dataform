@@ -13,7 +13,9 @@ WITH raw_forms AS (
 
 SELECT 
   f.* EXCEPT(rn),
-  l.name AS location_name
+  l.name AS location_name,
+  l.timezone
+  
 FROM raw_forms f
 JOIN ${ref('ghl_locations')} l ON f.locationId = l.id
 WHERE rn = 1
