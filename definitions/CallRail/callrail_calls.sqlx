@@ -5,8 +5,10 @@ config {
 SELECT 
   m.client_name,
   -- m.Industry,
-  -- m.client_success_manager,
+  m.account_manager,
   m.client_id,
+  m.callrail_id,
+  m.ghl_id,
   c.id,
   medium,
   source,
