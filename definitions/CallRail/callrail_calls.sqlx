@@ -45,17 +45,7 @@ SELECT
   -- tag_names,
   REGEXP_EXTRACT(p.script_url, r"/companies/(\d+)/") AS sid,
   
-  CASE
-    WHEN REGEXP_CONTAINS(LOWER(source), 'google ad') AND NOT REGEXP_CONTAINS(LOWER(source), 'lsa') THEN 'Google Ads'
-    WHEN REGEXP_CONTAINS(LOWER(source), 'facebook') THEN 'Facebook'
-    WHEN   
-        REGEXP_CONTAINS(LOWER(source), 'gls') THEN 'GLS'
-    WHEN 
-      (REGEXP_CONTAINS(TRIM(LOWER(source)), 'google my business')
-      OR REGEXP_CONTAINS(TRIM(LOWER(source)), 'google business profile'))
-     THEN 'GMB'
-    ELSE 'SEO'
-  END source_attribution,
+  s.source_attribution,
   
   IF(
         REGEXP_CONTAINS(LOWER(tag_names), 'qualified lead')
@@ -65,5 +55,6 @@ SELECT
 FROM callrail.Calls c
 LEFT JOIN ${ref("callrail_call_tags")} USING (id, company_id)
 JOIN ${ref("master_sheet")} m ON c.company_id = m.callrail_id
+JOIN ${ref("callrail_source_attribution")} s ON c.source = s.source
 JOIN callrail.Companies p ON c.company_id = p.id
 
