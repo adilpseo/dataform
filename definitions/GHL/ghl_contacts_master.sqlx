@@ -57,10 +57,10 @@ last_attribution AS (
 contacts AS (
   SELECT
     c.id AS contactId,
-    c.city,
+    -- c.city,
     c.type,
     c.email,
-    c.state,
+    -- c.state,
     c.source,
     c.country,
     c.firstName,
@@ -72,8 +72,8 @@ contacts AS (
     c.dateUpdated,
     c.assignedTo,
     c.locationId,
-    c.postalCode,
-    c.companyName,
+    -- c.postalCode,
+    -- c.companyName,
     c.contactName
   
   FROM ${ref("ghl_contacts")} c 
