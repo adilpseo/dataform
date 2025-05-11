@@ -6,12 +6,12 @@ WITH raw_contacts AS (
   SELECT
     id,
     dnd,
-    city,
+    -- city,
     tags,
     type,
     email,
     phone,
-    state,
+    -- state,
     source,
     assignedTo,
     country,
@@ -20,12 +20,12 @@ WITH raw_contacts AS (
     dateAdded,
     firstName,
     locationId,
-    postalCode,
+    -- postalCode,
     contactName,
     customFields,
     dateUpdated,
     attributions,
-    companyName,
+    -- companyName,
     ARRAY_TO_STRING(
     ARRAY(
       SELECT 
