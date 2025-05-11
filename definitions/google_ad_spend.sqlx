@@ -60,7 +60,11 @@ google_ads_spend AS (
 )
 
 SELECT 
-   *
+   *,
+   CASE 
+    WHEN advertising_channel_type = 'LOCAL_SERVICES' THEN 'LSA Spend'
+    ELSE 'Google Ads Spend'
+   END AS spend_type
 FROM google_ads_spend AS gads
 LEFT JOIN google_ad_accounts ga USING(customer_id)
 LEFT JOIN clients c USING(customer_id)
