@@ -1,0 +1,117 @@
+
+
+WITH google_ad_spend AS (
+  SELECT
+    client_id,
+    client_name,
+    ghl_id,
+    callrail_id,
+    date,
+    SUM(CASE WHEN spend_type = 'LSA Spend' THEN ad_spend END) AS ad_spend_lsa,
+    SUM(CASE WHEN spend_type = 'Google Ads Spend' THEN ad_spend END) AS ad_spend_google,
+    SUM(ad_spend) ad_spend_total
+  FROM ${ref('google_ad_spend')}
+  GROUP BY client_id, client_name, ghl_id, callrail_id, date
+),
+
+clients AS (
+  SELECT
+    client_id,
+    client_name,
+    start_date,
+    ghl_id,
+    callrail_id,
+    daily_management_fee,
+    monthly_management_fee,
+    seo_management,
+    ppc_management,
+    est_lead_to_service_call_ratio,
+    est_average_per_booked_call_transaction_value,
+    pseo_leads,
+    csr_conversion_rate,
+    technician_conversion_rate,
+    template_name
+  FROM ${ref('master_sheet')} m
+),
+
+calls_data AS (
+  SELECT
+    client_id,
+    client_name,
+    DATE(created_at) AS date,
+    callrail_id,
+    ghl_id,
+    CASE WHEN source_attribution IN ('Google Ads', 'Goolge Local Service') THEN 'PPC'
+      ELSE source_attribution
+    END AS source_attribution,
+    
+    COUNT(CASE WHEN formatted_call_type = 'Answered Call' THEN id END) AS calls
+
+  FROM ${ref('callrail_calls')}
+  GROUP BY 1,2,3,4,5,6
+),
+
+daily_calls AS (
+  SELECT 
+    client_id, 
+    client_name, 
+    callrail_id, 
+    ghl_id,
+    date,
+    SUM(CASE WHEN source_attribution = 'PPC' THEN calls END) AS calls_ppc,
+    SUM(CASE WHEN source_attribution = 'GMB' THEN calls END) AS calls_gmb,
+    SUM(CASE WHEN source_attribution = 'SEO' THEN calls END) AS calls_seo,
+    SUM(calls) AS calls_total
+
+  FROM calls_data
+  GROUP BY 1,2,3,4,5
+),
+
+daily_forms AS (
+  SELECT
+    client_id,
+    client_name,
+    locationId AS ghl_id,
+    callrail_id,
+    DATE(submitted_at) AS date,
+    COUNT(1) AS daily_forms
+  FROM ${ref('ghl_form_submissions')}
+  GROUP BY 1,2,3,4,5
+)
+
+SELECT
+  m.client_id,
+  m.client_name,
+  m.start_date,
+  m.ghl_id,
+  m.callrail_id,
+  m.daily_management_fee,
+  m.monthly_management_fee,
+  m.seo_management,
+  m.ppc_management,
+  m.est_lead_to_service_call_ratio,
+  m.est_average_per_booked_call_transaction_value,
+  m.pseo_leads,
+  m.csr_conversion_rate,
+  m.technician_conversion_rate,
+  m.template_name,
+
+  COALESCE(g.date, c.date, f.date) AS date,
+  DATE_TRUNC(COALESCE(g.date, c.date, f.date), MONTH) AS month,
+
+  g.ad_spend_lsa,
+  g.ad_spend_google,
+  g.ad_spend_total,
+
+  c.calls_ppc,
+  c.calls_gmb,
+  c.calls_seo,
+  c.calls_total,
+
+  f.daily_forms
+
+FROM google_ad_spend g
+FULL JOIN daily_calls c USING (client_id, client_name, callrail_id, date)
+FULL JOIN daily_forms f ON g.client_id = f.client_id AND g.client_name = f.client_name AND g.date = f.date AND g.ghl_id = f.ghl_id
+FULL JOIN clients m ON g.client_id = m.client_id AND g.callrail_id = m.callrail_id AND g.ghl_id = m.ghl_id
+
