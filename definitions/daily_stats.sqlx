@@ -1,3 +1,6 @@
+config {
+  type: "table"
+}
 
 
 WITH google_ad_spend AS (
