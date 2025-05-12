@@ -1,0 +1,23 @@
+
+
+WITH clients AS (
+  SELECT
+    client_id,
+    client_name,
+    ghl_id,
+    callrail_id,
+    IFNULL(daily_management_fee,0) daily_management_fee,
+  FROM ${ref('master_sheet')}
+)
+
+SELECT 
+  client_id,
+  client_name,
+  ghl_id,
+  callrail_id,
+  daily_management_fee,
+  _date,
+  _month,
+FROM ${ref('_dates')}
+JOIN clients USING (client_id, client_name)
+WHERE daily_management_fee != 0
