@@ -113,7 +113,21 @@ SELECT
   c.calls_seo,
   c.calls_total,
 
-  f.daily_forms
+  f.daily_forms,
+
+  IFNULL(c.calls_total,0) + IFNULL(f.daily_forms,0) AS total_leads,
+
+  (IFNULL(c.calls_total,0) + IFNULL(f.daily_forms,0)) * IFNULL(m.pseo_leads, 0.85) AS qualified_leads,
+  
+  ((IFNULL(m.monthly_management_fee,0) + IFNULL(m.seo_management,0) + IFNULL(m.ppc_management,0)) * 12) / 365 AS daily_service_fee,
+
+  (IFNULL(c.calls_total,0) + IFNULL(f.daily_forms,0)) * IFNULL(m.pseo_leads,1) * IFNULL(m.csr_conversion_rate, 0.85) AS csr_conversions,
+
+  ((IFNULL(c.calls_total,0) + IFNULL(f.daily_forms,0)) * IFNULL(m.pseo_leads,1) * IFNULL(m.csr_conversion_rate, 1)) * IFNULL(m.technician_conversion_rate, 0.75) AS technical_conversions,
+
+  (((IFNULL(c.calls_total,0) + IFNULL(f.daily_forms,0)) * IFNULL(m.pseo_leads,1) * IFNULL(m.csr_conversion_rate, 1)) * IFNULL(m.technician_conversion_rate, 0.75)) * IFNULL(CAST(est_average_per_booked_call_transaction_value AS FLOAT64),450) AS projected_revenue
+
+
 
 FROM google_ad_spend g
 FULL JOIN daily_calls c USING (client_id, client_name, callrail_id, date)
