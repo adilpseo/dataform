@@ -2,7 +2,12 @@ config {
   type: "table"
 }
 
-SELECT client_name, start_date, d._date
+SELECT 
+    client_id,
+    client_name, 
+    start_date, 
+    d._date,
+    DATE_TRUNC(_date, MONTH) AS _month
 FROM ${ref("master_sheet")} m
 JOIN (SELECT * FROM UNNEST(GENERATE_DATE_ARRAY('2023-01-01', CURRENT_DATE, INTERVAL 1 DAY)) AS _date) d 
   ON d._date >= start_date
