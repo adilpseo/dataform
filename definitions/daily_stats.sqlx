@@ -24,6 +24,7 @@ clients AS (
     start_date,
     ghl_id,
     callrail_id,
+    account_manager,
     daily_management_fee,
     monthly_management_fee,
     seo_management,
@@ -98,6 +99,7 @@ SELECT
   m.csr_conversion_rate,
   m.technician_conversion_rate,
   m.template_name,
+  m.account_manager,
 
   COALESCE(g.date, c.date, f.date) AS date,
   DATE_TRUNC(COALESCE(g.date, c.date, f.date), MONTH) AS month,
