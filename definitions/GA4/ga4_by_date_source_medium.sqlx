@@ -1,0 +1,27 @@
+config {
+  type: "table"
+}
+
+SELECT
+  RIGHT(property, 9) AS property,
+  date,
+  session_source,
+  session_medium,
+  sessions,
+  engaged_sessions,
+  engagement_rate,
+  event_count,
+  key_events,
+  user_engagement_duration,
+  events_per_session,
+  total_users,
+  total_revenue,
+
+  m.client_id,
+  m.client_name,
+  m.ghl_id,
+  m.callrail_id,
+  m.ga4_name
+
+FROM google_analytics_4.traffic_acquisition_session_source_medium_report r
+JOIN ${ref('master_sheet')} m ON RIGHT(property, 9) = CAST(m.ga4_id AS STRING)
