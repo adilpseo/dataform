@@ -38,7 +38,10 @@ SELECT
   c.customer_name,
   c.customer_country,
   c.customer_phone_number,
-  formatted_customer_location,
+  c.formatted_customer_location,
+  c.formatted_tracking_phone_number,
+  c.formatted_tracking_source,
+
   CONCAT("https://app.callrail.com/analytics/a/420424648/events/",c.person_id,"?event_id=",c.id,"&event_type=call") AS call_link,
   JSON_EXTRACT_SCALAR(speaker_percent, "$.agent") AS agent_percent,
   JSON_EXTRACT_SCALAR(speaker_percent, "$.customer") AS customer_percent,
