@@ -16,6 +16,7 @@ google_ad_accounts AS (
 clients AS (
   SELECT 
     client_id,
+    clientkey,
     client_name,
     ghl_id,
     lid,
