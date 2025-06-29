@@ -5,6 +5,7 @@ config {
 
 WITH clients AS (
   SELECT
+    client_id,
     clientkey,
     lid,
     client_name,
@@ -115,7 +116,7 @@ SELECT
 
 
 FROM ${ref('_dates')} d
-LEFT JOIN clients m USING (clientkey, lid, date)
+LEFT JOIN clients m USING (clientkey, lid)
 LEFT JOIN google_ad_spend g USING (clientkey, lid, date)
 LEFT JOIN daily_calls c USING (clientkey, lid, date)
 LEFT JOIN daily_forms f USING (clientkey, lid, date)
