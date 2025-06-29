@@ -20,6 +20,7 @@ WITH google_ad_spend AS (
 clients AS (
   SELECT
     client_id,
+    clientkey,
     client_name,
     start_date,
     ghl_id,
@@ -85,6 +86,7 @@ daily_forms AS (
 
 SELECT
   m.client_id,
+  m.clientkey,
   m.client_name,
   m.start_date,
   m.ghl_id,

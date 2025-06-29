@@ -4,6 +4,7 @@ config {
 
 SELECT 
     client_id,
+    clientkey,
     client_name, 
     start_date, 
     d._date,

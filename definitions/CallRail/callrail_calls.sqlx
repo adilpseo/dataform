@@ -4,6 +4,7 @@ config {
 
 SELECT 
   m.client_name,
+  m.clientkey,
   -- m.Industry,
   m.account_manager,
   m.client_id,

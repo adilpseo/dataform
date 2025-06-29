@@ -5,6 +5,7 @@ config {
 WITH client_properties AS (
   SELECT
     client_id,
+    clientkey,
     client_name,
     start_date,
     ghl_id,
