@@ -18,6 +18,7 @@ clients AS (
     client_id,
     client_name,
     ghl_id,
+    lid,
     callrail_id,
     start_date,
     google_ad_id AS customer_id,

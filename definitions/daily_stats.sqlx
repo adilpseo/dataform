@@ -3,25 +3,12 @@ config {
 }
 
 
-WITH google_ad_spend AS (
+WITH clients AS (
   SELECT
-    client_id,
-    client_name,
-    ghl_id,
-    callrail_id,
-    date,
-    SUM(CASE WHEN spend_type = 'LSA Spend' THEN ad_spend END) AS ad_spend_lsa,
-    SUM(CASE WHEN spend_type = 'Google Ads Spend' THEN ad_spend END) AS ad_spend_google,
-    SUM(ad_spend) ad_spend_total
-  FROM ${ref('google_ad_spend')}
-  GROUP BY client_id, client_name, ghl_id, callrail_id, date
-),
-
-clients AS (
-  SELECT
-    client_id,
     clientkey,
+    lid,
     client_name,
+    client_logo,
     start_date,
     ghl_id,
     callrail_id,
@@ -39,54 +26,50 @@ clients AS (
   FROM ${ref('master_sheet')} m
 ),
 
-calls_data AS (
+google_ad_spend AS (
   SELECT
-    client_id,
-    client_name,
-    DATE(created_at) AS date,
-    callrail_id,
-    ghl_id,
-    CASE WHEN source_attribution IN ('Google Ads', 'Goolge Local Service') THEN 'PPC'
-      ELSE source_attribution
-    END AS source_attribution,
-    
-    COUNT(CASE WHEN formatted_call_type = 'Answered Call' THEN id END) AS calls
-
-  FROM ${ref('callrail_calls')}
-  GROUP BY 1,2,3,4,5,6
+    clientkey,
+    lid,
+    date,
+    SUM(CASE WHEN spend_type = 'LSA Spend' THEN ad_spend END) AS ad_spend_lsa,
+    SUM(CASE WHEN spend_type = 'Google Ads Spend' THEN ad_spend END) AS ad_spend_google,
+    SUM(ad_spend) ad_spend_total
+  FROM ${ref('google_ad_spend')}
+  GROUP BY 1,2,3
 ),
 
 daily_calls AS (
-  SELECT 
-    client_id, 
-    client_name, 
-    callrail_id, 
-    ghl_id,
-    date,
-    SUM(CASE WHEN source_attribution = 'PPC' THEN calls END) AS calls_ppc,
-    SUM(CASE WHEN source_attribution = 'GMB' THEN calls END) AS calls_gmb,
-    SUM(CASE WHEN source_attribution = 'SEO' THEN calls END) AS calls_seo,
-    SUM(calls) AS calls_total
+  SELECT
+    clientkey,
+    lid,
+    DATE(created_at) AS date,
 
-  FROM calls_data
-  GROUP BY 1,2,3,4,5
+    COUNT(CASE WHEN source_type = 'PPC' THEN id END) AS calls_ppc,
+    COUNT(CASE WHEN source_type = 'GMB' THEN id END) AS calls_gmb,
+    COUNT(CASE WHEN source_type = 'SEO' THEN id END) AS calls_seo,
+    COUNT(id) AS calls_total,
+    COUNT(CASE WHEN formatted_call_type = 'Answered Call' THEN id END) AS calls_answered
+
+  FROM ${ref('callrail_calls')}
+  GROUP BY 1,2,3
 ),
+
 
 daily_forms AS (
   SELECT
-    client_id,
-    client_name,
-    locationId AS ghl_id,
-    callrail_id,
+    clientkey,
+    lid,
     DATE(submitted_at) AS date,
     COUNT(1) AS daily_forms
   FROM ${ref('ghl_form_submissions')}
-  GROUP BY 1,2,3,4,5
+  GROUP BY 1,2,3
 )
 
 SELECT
   m.client_id,
   m.clientkey,
+  m.lid,
+  m.client_logo,
   m.client_name,
   m.start_date,
   m.ghl_id,
@@ -103,8 +86,8 @@ SELECT
   m.template_name,
   m.account_manager,
 
-  COALESCE(g.date, c.date, f.date) AS date,
-  DATE_TRUNC(COALESCE(g.date, c.date, f.date), MONTH) AS month,
+  d.date,
+  d._month AS month,
 
   g.ad_spend_lsa,
   g.ad_spend_google,
@@ -131,8 +114,10 @@ SELECT
 
 
 
-FROM google_ad_spend g
-FULL JOIN daily_calls c USING (client_id, client_name, callrail_id, date)
-FULL JOIN daily_forms f ON g.client_id = f.client_id AND g.client_name = f.client_name AND g.date = f.date AND g.ghl_id = f.ghl_id
-FULL JOIN clients m ON g.client_id = m.client_id AND g.callrail_id = m.callrail_id AND g.ghl_id = m.ghl_id
+FROM ${ref('_dates')} d
+LEFT JOIN clients m USING (clientkey, lid, date)
+LEFT JOIN google_ad_spend g USING (clientkey, lid, date)
+LEFT JOIN daily_calls c USING (clientkey, lid, date)
+LEFT JOIN daily_forms f USING (clientkey, lid, date)
+
 

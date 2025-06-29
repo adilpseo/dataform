@@ -10,7 +10,8 @@ WITH client_properties AS (
     start_date,
     ghl_id,
     CAST(ga4_id AS STRING) AS property,
-    ga4_name
+    ga4_name,
+    lid,
 
   FROM ${ref("master_sheet")}
   WHERE ga4_id IS NOT NULL

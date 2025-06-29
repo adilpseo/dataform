@@ -28,6 +28,7 @@ SELECT
   m.account_manager,
   m.callrail_id,
   m.clientkey,
+  m.lid
 
 FROM raw_data d
 LEFT JOIN ${ref('ghl_forms')} f ON d.formid = f.id

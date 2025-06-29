@@ -26,6 +26,7 @@ SELECT
   m.client_id,
   m.client_name,
   m.clientkey,
+  m.lid
 
 FROM raw_appointments a
 JOIN ${ref("master_sheet")} m ON a.locationId = m.ghl_id

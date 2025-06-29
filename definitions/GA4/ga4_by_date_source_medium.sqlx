@@ -23,6 +23,7 @@ SELECT
   m.callrail_id,
   m.ga4_name,
   m.clientkey,
+  m.lid
 
 FROM google_analytics_4.traffic_acquisition_session_source_medium_report r
 JOIN ${ref('master_sheet')} m ON RIGHT(property, 9) = CAST(m.ga4_id AS STRING)

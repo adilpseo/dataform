@@ -10,6 +10,7 @@ SELECT
   m.client_id,
   m.callrail_id,
   m.ghl_id,
+  m.lid,
   c.id,
 
   c.medium,
@@ -51,6 +52,10 @@ SELECT
   REGEXP_EXTRACT(p.script_url, r"/companies/(\d+)/") AS sid,
   
   s.source_attribution,
+  CASE 
+    WHEN s.source_attribution IN ('Google Ads', 'Goolge Local Service') THEN 'PPC'
+    ELSE s.source_attribution
+  END AS source_type,
   
   IF(
         REGEXP_CONTAINS(LOWER(tag_names), 'qualified lead')

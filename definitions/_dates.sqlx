@@ -6,10 +6,11 @@ SELECT
     client_id,
     clientkey,
     client_name, 
+    lid,
     start_date, 
-    d._date,
+    d._date AS date,
     DATE_TRUNC(_date, MONTH) AS _month
 FROM ${ref("master_sheet")} m
 JOIN (SELECT * FROM UNNEST(GENERATE_DATE_ARRAY('2023-01-01', CURRENT_DATE, INTERVAL 1 DAY)) AS _date) d 
   ON d._date >= start_date
-  AND m.start_date IS NOT NULL
+  -- AND m.start_date IS NOT NULL
