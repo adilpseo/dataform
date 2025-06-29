@@ -87,7 +87,7 @@ SELECT
   m.account_manager,
 
   d.date,
-  d._month AS month,
+  d.month,
 
   g.ad_spend_lsa,
   g.ad_spend_google,

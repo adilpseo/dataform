@@ -6,6 +6,8 @@ config {
 WITH clients AS (
   SELECT
     client_id,
+    clientkey,
+    lid,
     client_name,
     ghl_id,
     callrail_id,
@@ -17,16 +19,17 @@ WITH clients AS (
 
 months AS (
   SELECT
-    client_id,
-    client_name,
-    _month
+    clientkey,
+    lid,
+    month
   FROM ${ref('_dates')}
-  JOIN clients USING (client_id, client_name)
-  GROUP BY 1,2,3
+  JOIN clients USING (clientkey, lid)
 )
 
 SELECT 
   client_id,
+  clientkey,
+  lid,
   client_name,
   ghl_id,
   callrail_id,
@@ -34,6 +37,6 @@ SELECT
   seo_management,
   ppc_management,
   monthly_management_fee + seo_management + ppc_management AS monthly_fee,
-  _month
+  month
 FROM months
-JOIN clients USING (client_id, client_name)
+JOIN clients USING (clientkey, lid)

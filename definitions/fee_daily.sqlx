@@ -3,6 +3,8 @@
 WITH clients AS (
   SELECT
     client_id,
+    clientkey,
+    lid,
     client_name,
     ghl_id,
     callrail_id,
@@ -12,12 +14,14 @@ WITH clients AS (
 
 SELECT 
   client_id,
+  clientkey,
+  lid,
   client_name,
   ghl_id,
   callrail_id,
   daily_management_fee,
-  _date,
-  _month,
+  date,
+  month,
 FROM ${ref('_dates')}
-JOIN clients USING (client_id, client_name)
+JOIN clients USING (clientkey, lid)
 WHERE daily_management_fee != 0
