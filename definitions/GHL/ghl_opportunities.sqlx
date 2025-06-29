@@ -63,6 +63,7 @@ SELECT
 
   m.client_id,
   m.client_name,
+  m.clientkey
 
 
 FROM raw_opps r 
