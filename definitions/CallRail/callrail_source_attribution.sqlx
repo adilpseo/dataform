@@ -22,7 +22,7 @@ SELECT
     WHEN 
       REGEXP_CONTAINS(LOWER(source), 'gls') 
       OR REGEXP_CONTAINS(source, 'LSA') 
-    THEN 'GLSA'
+    THEN 'LSA'
     
     WHEN 
       (REGEXP_CONTAINS(TRIM(LOWER(source)), 'google my business')
