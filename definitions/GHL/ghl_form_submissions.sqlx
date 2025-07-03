@@ -23,6 +23,12 @@ SELECT
   f.location_name,
   JSON_VALUE(form_data, '$.eventData.source') AS source,
 
+  CASE
+    WHEN JSON_VALUE(form_data, '$.eventData.source') IN ('Paid Search', 'Paid Social', 'Social media') THEN 'PPC'
+    WHEN JSON_VALUE(form_data, '$.eventData.source') = 'Organic Search' THEN 'SEO'
+    ELSE 'LSA'
+  END AS form_source_category,
+
   m.client_id,
   m.client_name,
   m.account_manager,
