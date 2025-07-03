@@ -101,6 +101,7 @@ SELECT
   c.calls_ppc,
   c.calls_gmb,
   c.calls_seo,
+  c.calls_lsa,
   c.calls_total,
 
   f.forms_ppc,
