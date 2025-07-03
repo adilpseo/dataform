@@ -48,6 +48,7 @@ daily_calls AS (
     COUNT(CASE WHEN source_type = 'PPC' THEN id END) AS calls_ppc,
     COUNT(CASE WHEN source_type = 'GMB' THEN id END) AS calls_gmb,
     COUNT(CASE WHEN source_type = 'SEO' THEN id END) AS calls_seo,
+    COUNT(CASE WHEN source_type = 'LSA' THEN id END) AS calls_lsa,
     COUNT(id) AS calls_total,
     COUNT(CASE WHEN formatted_call_type = 'Answered Call' THEN id END) AS calls_answered
 
@@ -61,6 +62,9 @@ daily_forms AS (
     clientkey,
     lid,
     DATE(submitted_at) AS date,
+    COUNT(CASE WHEN form_source_category = 'PPC' THEN submission_id END) AS forms_ppc,
+    COUNT(CASE WHEN form_source_category = 'LSA' THEN submission_id END) AS forms_lsa,
+    COUNT(CASE WHEN form_source_category = 'SEO' THEN submission_id END) AS forms_seo,
     COUNT(1) AS daily_forms
   FROM ${ref('ghl_form_submissions')}
   GROUP BY 1,2,3
@@ -99,6 +103,9 @@ SELECT
   c.calls_seo,
   c.calls_total,
 
+  f.forms_ppc,
+  f.forms_lsa,
+  f.forms_seo,
   f.daily_forms,
 
   IFNULL(c.calls_total,0) + IFNULL(f.daily_forms,0) AS total_leads,
