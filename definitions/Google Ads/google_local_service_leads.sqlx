@@ -22,7 +22,14 @@ local_service_leads AS (
     credit_details_credit_state,
     lead_charged,
     lead_status,
-    lead_type
+    lead_type,
+    CASE
+      WHEN lead_charged = TRUE AND (credit_details_credit_state IS NULL OR credit_details_credit_state = 'UNSPECIFIED') THEN 'charged'
+      WHEN lead_charged = TRUE AND credit_details_credit_state = 'CREDITED' THEN 'credited'
+      WHEN lead_charged = TRUE AND credit_details_credit_state = 'PENDING' THEN 'pending'
+      WHEN lead_charged = FALSE THEN 'not charged'
+      ELSE 'unknown'
+`  END AS charge_status
   FROM google_ads.local_services_lead
 
   UNION ALL
@@ -34,7 +41,14 @@ local_service_leads AS (
     credit_details_credit_state,
     lead_charged,
     lead_status,
-    lead_type
+    lead_type,
+    CASE
+      WHEN lead_charged = TRUE AND (credit_details_credit_state IS NULL OR credit_details_credit_state = 'UNSPECIFIED') THEN 'charged'
+      WHEN lead_charged = TRUE AND credit_details_credit_state = 'CREDITED' THEN 'credited'
+      WHEN lead_charged = TRUE AND credit_details_credit_state = 'PENDING' THEN 'pending'
+      WHEN lead_charged = FALSE THEN 'not charged'
+      ELSE 'unknown'
+`  END AS charge_status
   FROM google_ads.local_services_lead
 )
 
