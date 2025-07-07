@@ -51,7 +51,8 @@ compaign_stats AS (
     id AS campaign_id,
     SUM(SAFE_DIVIDE(cost_micros, 1000000)) AS ad_spend,
     SUM(clicks) AS clicks,
-    SUM(impressions) AS impressions
+    SUM(impressions) AS impressions,
+    SUM(conversions) AS conversions
   FROM google_ads.campaign_stats
   GROUP BY date, customer_id, id
 ),
