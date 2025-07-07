@@ -1,0 +1,46 @@
+config {
+  type: "table"
+}
+
+WITH google_ad_ids AS (
+  SELECT 
+    google_ad_id,
+    google_ad_name,
+    client_id,
+    lid,
+    client_name,
+    clientkey
+  FROM ${ref('master_sheet')}
+  WHERE google_ad_id IS NOT NULL
+),
+
+local_service_leads AS (
+  SELECT
+    customer_id,
+    DATETIME(creation_date_time) AS created_at,
+    id AS lead_id,
+    credit_details_credit_state,
+    lead_charged,
+    lead_status,
+    lead_type
+  FROM google_ads.local_services_lead
+
+  UNION ALL
+
+  SELECT
+    customer_id,
+    DATETIME(creation_date_time) AS created_at,
+    id AS lead_id,
+    credit_details_credit_state,
+    lead_charged,
+    lead_status,
+    lead_type
+  FROM google_ads.local_services_lead
+)
+
+SELECT
+  l.*,
+  c.*
+
+FROM local_service_leads l
+JOIN google_ad_ids c ON l.customer_id = c.google_ad_id
