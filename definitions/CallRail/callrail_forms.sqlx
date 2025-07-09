@@ -20,6 +20,7 @@ SELECT
   -- m.Industry,
   m.account_manager,
   m.client_id,
+  m.clientkey,
   m.callrail_id,
   m.ghl_id,
   f.id AS form_submission_id,
