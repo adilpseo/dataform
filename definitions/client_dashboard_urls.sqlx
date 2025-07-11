@@ -8,10 +8,10 @@ SELECT
   client_id,
   client_name,
 
-  -- https://lookerstudio.google.com/embed/reporting/4a46e996-b05c-4a8c-b05f-f3465a6f3c9b
+  -- https://lookerstudio.google.com/reporting/4a46e996-b05c-4a8c-b05f-f3465a6f3c9b
 
   CONCAT(
-    "https://https://lookerstudio.google.com/embed/reporting/4a46e996-b05c-4a8c-b05f-f3465a6f3c9b?params=%7B",
+    "https://lookerstudio.google.com/reporting/4a46e996-b05c-4a8c-b05f-f3465a6f3c9b?params=%7B",
     "%22ds1%22%3A%22", clientkey, "%22%2C",
     "%22ds2%22%3A%22", clientkey, "%22%2C",
     "%22ds3%22%3A%22", clientkey, "%22%2C",
