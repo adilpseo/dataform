@@ -2,44 +2,62 @@ config {
   type: "table"
 }
 
-SELECT 
-  client_id,
-  lid,
-  clientkey,
-  client_name,
-  google_ad_id AS customer_id
-FROM ${ref('master_sheet')}
-WHERE google_ad_id IS NOT NULL
+WITH accounts AS (
+  SELECT id AS customer_id, descriptive_name 
+  FROM google_ads.account_history
+  WHERE _fivetran_active IS TRUE
 
-UNION ALL
+  UNION ALL
 
-SELECT 
-  client_id,
-  lid,
-  clientkey,
-  client_name,
-  google_ad_id_2 AS customer_id
-FROM ${ref('master_sheet')}
-WHERE google_ad_id_2 IS NOT NULL
+  SELECT id AS customer_id, descriptive_name 
+  FROM lsa_mcc.account_history
+  WHERE _fivetran_active IS TRUE
+),
 
-UNION ALL
+google_ad_ids AS (
+  SELECT 
+    client_id,
+    lid,
+    clientkey,
+    client_name,
+    google_ad_id AS customer_id
+  FROM ${ref('master_sheet')}
+  WHERE google_ad_id IS NOT NULL
 
-SELECT 
-  client_id,
-  lid,
-  clientkey,
-  client_name,
-  google_ad_id_3 AS customer_id
-FROM ${ref('master_sheet')}
-WHERE google_ad_id_3 IS NOT NULL
+  UNION ALL
 
-UNION ALL
+  SELECT 
+    client_id,
+    lid,
+    clientkey,
+    client_name,
+    google_ad_id_2 AS customer_id
+  FROM ${ref('master_sheet')}
+  WHERE google_ad_id_2 IS NOT NULL
 
-SELECT 
-  client_id,
-  lid,
-  clientkey,
-  client_name,
-  google_ad_id_4 AS customer_id
-FROM ${ref('master_sheet')}
-WHERE google_ad_id_4 IS NOT NULL
+  UNION ALL
+
+  SELECT 
+    client_id,
+    lid,
+    clientkey,
+    client_name,
+    google_ad_id_3 AS customer_id
+  FROM ${ref('master_sheet')}
+  WHERE google_ad_id_3 IS NOT NULL
+
+  UNION ALL
+
+  SELECT 
+    client_id,
+    lid,
+    clientkey,
+    client_name,
+    google_ad_id_4 AS customer_id
+  FROM ${ref('master_sheet')}
+  WHERE google_ad_id_4 IS NOT NULL
+)
+
+SELECT *
+FROM google_ad_ids
+JOIN accounts USING (customer_id)

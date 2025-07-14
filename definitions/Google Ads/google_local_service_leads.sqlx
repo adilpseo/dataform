@@ -42,8 +42,6 @@ WITH local_service_leads AS (
 )
 
 SELECT
-  l.*,
-  c.*
-
+  *
 FROM local_service_leads l
 JOIN ${ref('google_ad_ids')} c USING (customer_id)
