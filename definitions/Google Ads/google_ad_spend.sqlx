@@ -3,34 +3,21 @@ config {
 }
 
 WITH accounts AS (
-  SELECT *
+  SELECT id AS customer_id, descriptive_name 
   FROM google_ads.account_history
+  WHERE _fivetran_active IS TRUE
+
+  UNION ALL
+
+  SELECT id AS customer_id, descriptive_name 
+  FROM lsa_mcc.account_history
   WHERE _fivetran_active IS TRUE
 ),
 
-google_ad_accounts AS (
-  SELECT DISTINCT id AS customer_id, descriptive_name
-  FROM accounts
-),
 
 clients AS (
-  SELECT 
-    client_id,
-    clientkey,
-    client_name,
-    ghl_id,
-    lid,
-    callrail_id,
-    start_date,
-    google_ad_id AS customer_id,
-    google_ad_name
-  FROM ${ref("master_sheet")}
-  WHERE google_ad_id IS NOT NULL
-),
-
-google_accounts_latest AS (
   SELECT *
-  FROM google_ad_accounts 
+  FROM ${ref("google_ad_ids")}  
 ),
 
 google_campaigns AS (
@@ -39,8 +26,17 @@ google_campaigns AS (
       customer_id,
       advertising_channel_type, 
       name AS campaign_name
-
   FROM google_ads.campaign_history
+  WHERE _fivetran_active IS TRUE
+
+  UNION ALL
+
+  SELECT 
+    id AS campaign_id,
+    customer_id,
+    advertising_channel_type, 
+    name AS campaign_name
+  FROM lsa_mcc.campaign_history
   WHERE _fivetran_active IS TRUE
 ),
 
@@ -54,6 +50,19 @@ compaign_stats AS (
     SUM(impressions) AS impressions,
     SUM(conversions) AS conversions
   FROM google_ads.campaign_stats
+  GROUP BY date, customer_id, id
+
+  UNION ALL
+
+  SELECT
+    date,
+    customer_id,
+    id AS campaign_id,
+    SUM(SAFE_DIVIDE(cost_micros, 1000000)) AS ad_spend,
+    SUM(clicks) AS clicks,
+    SUM(impressions) AS impressions,
+    SUM(conversions) AS conversions
+  FROM lsa_mcc.campaign_stats
   GROUP BY date, customer_id, id
 ),
 

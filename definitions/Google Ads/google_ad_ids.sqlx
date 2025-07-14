@@ -7,7 +7,7 @@ SELECT
   lid,
   clientkey,
   client_name,
-  google_ad_id
+  google_ad_id AS customer_id
 FROM ${ref('master_sheet')}
 WHERE google_ad_id IS NOT NULL
 
@@ -18,7 +18,7 @@ SELECT
   lid,
   clientkey,
   client_name,
-  google_ad_id_2 AS google_ad_id
+  google_ad_id_2 AS customer_id
 FROM ${ref('master_sheet')}
 WHERE google_ad_id_2 IS NOT NULL
 
@@ -29,7 +29,7 @@ SELECT
   lid,
   clientkey,
   client_name,
-  google_ad_id_3 AS google_ad_id
+  google_ad_id_3 AS customer_id
 FROM ${ref('master_sheet')}
 WHERE google_ad_id_3 IS NOT NULL
 
@@ -40,6 +40,6 @@ SELECT
   lid,
   clientkey,
   client_name,
-  google_ad_id_4 AS google_ad_id
+  google_ad_id_4 AS customer_id
 FROM ${ref('master_sheet')}
 WHERE google_ad_id_4 IS NOT NULL
