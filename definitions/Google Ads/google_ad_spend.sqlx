@@ -2,19 +2,7 @@ config {
   type: "table"
 }
 
-WITH accounts AS (
-  SELECT id AS customer_id, descriptive_name 
-  FROM google_ads.account_history
-  WHERE _fivetran_active IS TRUE
-
-  UNION ALL
-
-  SELECT id AS customer_id, descriptive_name 
-  FROM lsa_mcc.account_history
-  WHERE _fivetran_active IS TRUE
-),
-
-google_campaigns AS (
+WITH google_campaigns AS (
   SELECT 
       id AS campaign_id,
       customer_id,
@@ -73,6 +61,5 @@ SELECT
     ELSE 'Google Ads Spend'
    END AS spend_type
 FROM google_ads_spend AS gads
-LEFT JOIN accounts ga USING(customer_id)
 LEFT JOIN ${ref("google_ad_ids")} c USING(customer_id)
 
