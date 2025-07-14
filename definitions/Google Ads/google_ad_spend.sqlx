@@ -14,12 +14,6 @@ WITH accounts AS (
   WHERE _fivetran_active IS TRUE
 ),
 
-
-clients AS (
-  SELECT *
-  FROM ${ref("google_ad_ids")}  
-),
-
 google_campaigns AS (
   SELECT 
       id AS campaign_id,
@@ -79,5 +73,6 @@ SELECT
     ELSE 'Google Ads Spend'
    END AS spend_type
 FROM google_ads_spend AS gads
-LEFT JOIN google_ad_accounts ga USING(customer_id)
-LEFT JOIN clients c USING(customer_id)
+LEFT JOIN accounts ga USING(customer_id)
+LEFT JOIN ${ref("google_ad_ids")} c USING(customer_id)
+
