@@ -56,8 +56,74 @@ google_ad_ids AS (
     google_ad_id_4 AS customer_id
   FROM ${ref('master_sheet')}
   WHERE google_ad_id_4 IS NOT NULL
+
+    UNION ALL
+
+  SELECT 
+    client_id,
+    lid,
+    clientkey,
+    client_name,
+    google_ad_id_5 AS customer_id
+  FROM ${ref('master_sheet')}
+  WHERE google_ad_id_5 IS NOT NULL
+
+    UNION ALL
+
+  SELECT 
+    client_id,
+    lid,
+    clientkey,
+    client_name,
+    google_ad_id_6 AS customer_id
+  FROM ${ref('master_sheet')}
+  WHERE google_ad_id_6 IS NOT NULL
+
+    UNION ALL
+
+  SELECT 
+    client_id,
+    lid,
+    clientkey,
+    client_name,
+    google_ad_id_7 AS customer_id
+  FROM ${ref('master_sheet')}
+  WHERE google_ad_id_7 IS NOT NULL
+
+    UNION ALL
+
+  SELECT 
+    client_id,
+    lid,
+    clientkey,
+    client_name,
+    google_ad_id_8 AS customer_id
+  FROM ${ref('master_sheet')}
+  WHERE google_ad_id_8 IS NOT NULL
+
+    UNION ALL
+
+  SELECT 
+    client_id,
+    lid,
+    clientkey,
+    client_name,
+    google_ad_id_9 AS customer_id
+  FROM ${ref('master_sheet')}
+  WHERE google_ad_id_9 IS NOT NULL
+
+    UNION ALL
+
+  SELECT 
+    client_id,
+    lid,
+    clientkey,
+    client_name,
+    google_ad_id_10 AS customer_id
+  FROM ${ref('master_sheet')}
+  WHERE google_ad_id_10 IS NOT NULL
 )
 
-SELECT *
+SELECT DISTINCT *
 FROM google_ad_ids
 JOIN accounts USING (customer_id)
