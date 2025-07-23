@@ -26,9 +26,10 @@ SELECT
   google_ad_id_7,
   google_ad_id_8,
   google_ad_id_9,
-  gsc_property_10,
+  google_ad_id_10,
+  gsc_property_id,
 
-  pct_ad_spend,
+--   pct_ad_spend,
   ad_spend_threshold,
 
   gsc_name,
