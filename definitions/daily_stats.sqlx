@@ -113,6 +113,8 @@ SELECT
   f.forms_seo,
   f.daily_forms,
 
+  gas.add_service_fee,
+
   IFNULL(c.calls_total,0) + IFNULL(f.daily_forms,0) AS total_leads,
 
   (IFNULL(c.calls_total,0) + IFNULL(f.daily_forms,0)) * IFNULL(m.pseo_leads, 0.85) AS qualified_leads,
