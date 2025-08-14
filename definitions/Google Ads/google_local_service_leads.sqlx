@@ -6,7 +6,7 @@ config {
 WITH local_service_leads AS (
   SELECT
     customer_id,
-    DATETIME(creation_date_time) AS created_at,
+    creation_date_time,
     id AS lead_id,
     credit_details_credit_state,
     lead_charged,
@@ -25,7 +25,7 @@ WITH local_service_leads AS (
 
   SELECT
     customer_id,
-    DATETIME(creation_date_time) AS created_at,
+    creation_date_time,
     id AS lead_id,
     credit_details_credit_state,
     lead_charged,
@@ -42,6 +42,8 @@ WITH local_service_leads AS (
 )
 
 SELECT
-  *
+  * EXCEPT(creation_date_time),
+    DATETIME(TIMESTAMP(creation_date_time, 'UTC'), c.time_zone ) AS created_at,
+
 FROM local_service_leads l
 JOIN ${ref('google_ad_ids')} c USING (customer_id)
