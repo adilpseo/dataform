@@ -1,0 +1,32 @@
+config {
+  type: "table"
+}
+
+WITH clients AS (
+  SELECT
+    clientkey,
+    lid,
+    ad_spend_threshold,
+    pct_ad_spend
+  FROM ${ref('master_sheet')}
+  WHERE pct_ad_spend IS NOT NULL
+),
+
+google_ad_spend AS (
+  SELECT
+    clientkey,
+    lid,
+    DATE_TRUNC(date, MONTH) AS month,
+    SUM(ad_spend) AS ad_spend,
+  FROM ${ref('google_ad_spend')}
+  GROUP BY 1,2,3
+)
+
+SELECT
+  *,
+  CASE WHEN ad_spend > ad_spend_threshold
+    THEN (ad_spend - ad_spend_threshold) * pct_ad_spend
+  END AS add_service_fee
+
+FROM clients
+JOIN google_ad_spend USING (clientkey, lid)
