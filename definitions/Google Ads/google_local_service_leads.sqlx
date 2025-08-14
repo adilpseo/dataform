@@ -47,4 +47,3 @@ SELECT
 
 FROM local_service_leads l
 JOIN ${ref('google_ad_ids')} c USING (customer_id)
-WHERE l.lead_id = 260858735
