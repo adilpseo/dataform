@@ -31,7 +31,7 @@ SELECT
   gsc_property_id,
 
   pct_ad_spend, 
-  ad_spend_threshold 
+  ad_spend_threshold,
 
   gsc_name,
   gmb_location_id,
