@@ -43,7 +43,8 @@ WITH local_service_leads AS (
 
 SELECT
   * EXCEPT(creation_date_time),
-    DATETIME(TIMESTAMP(creation_date_time, 'UTC'), c.time_zone ) AS created_at,
+  DATETIME(TIMESTAMP(creation_date_time, 'UTC'), c.time_zone ) AS created_at,
 
 FROM local_service_leads l
 JOIN ${ref('google_ad_ids')} c USING (customer_id)
+WHERE l.lead_id = 260858735
