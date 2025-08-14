@@ -132,5 +132,6 @@ LEFT JOIN clients m USING (clientkey, lid)
 LEFT JOIN google_ad_spend g USING (clientkey, lid, date)
 LEFT JOIN daily_calls c USING (clientkey, lid, date)
 LEFT JOIN daily_forms f USING (clientkey, lid, date)
+LEFT JOIN ${ref('google_additional_service_fee')} gas USING (clientkey, lid, date)
 
 

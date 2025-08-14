@@ -16,7 +16,7 @@ google_ad_spend AS (
   SELECT
     clientkey,
     lid,
-    DATE_TRUNC(date, MONTH) AS month,
+    DATE_TRUNC(date, MONTH) AS date,
     SUM(ad_spend) AS ad_spend,
   FROM ${ref('google_ad_spend')}
   GROUP BY 1,2,3
