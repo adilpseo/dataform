@@ -48,7 +48,7 @@ daily_calls AS (
     DATE(created_at) AS date,
 
     COUNT(CASE WHEN source_type = 'PPC' THEN id END) AS calls_ppc,
-    COUNT(CASE WHEN source_type = 'GMB' THEN id END) AS calls_gmb,
+    COUNT(CASE WHEN source_type = 'GBP' THEN id END) AS calls_gmb,
     COUNT(CASE WHEN source_type = 'SEO' THEN id END) AS calls_seo,
     COUNT(CASE WHEN source_type = 'LSA' THEN id END) AS calls_lsa,
     COUNT(id) AS calls_total,
