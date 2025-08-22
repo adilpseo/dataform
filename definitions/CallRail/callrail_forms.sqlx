@@ -53,7 +53,7 @@ SELECT
     WHEN 
       (REGEXP_CONTAINS(TRIM(LOWER(source)), 'google my business')
       OR REGEXP_CONTAINS(TRIM(LOWER(source)), 'google business profile'))
-     THEN 'GMB'
+     THEN 'GBP'
     ELSE 'SEO'
   END source_attribution,
   IF(REGEXP_CONTAINS(LOWER(tag_names), 'qualified lead'), 'Verified', 'Not Verified') is_verified_lead,

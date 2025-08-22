@@ -29,7 +29,7 @@ SELECT
       OR REGEXP_CONTAINS(TRIM(LOWER(source)), 'google business profile')
       OR REGEXP_CONTAINS(TRIM(LOWER(source)), 'online presence')
       OR REGEXP_CONTAINS(TRIM(source), 'GBP'))
-    THEN 'GMB'
+    THEN 'GBP'
 
     WHEN 
       REGEXP_CONTAINS(TRIM(LOWER(source)), 'direct')
