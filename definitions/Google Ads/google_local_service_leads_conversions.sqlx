@@ -1,0 +1,24 @@
+config {
+  type: "table"
+}
+
+WITH raw_data AS (
+  SELECT
+    id,
+    customer_id,
+    local_services_lead_id AS lead_id,
+    conversation_channel,
+    event_date_time,
+    phone_call_details_call_duration_millis / 1000 AS duration_seconds,
+    participant_type,
+    phone_call_details_call_recording_url,
+    message_details_text,
+    ROW_NUMBER() OVER(PARTITION BY local_services_lead_id ORDER BY event_date_time) rn
+  FROM google_ads.local_services_lead_conversations
+  -- WHERE conversation_channel = 'PHONE_CALL'
+)
+
+SELECT * EXCEPT(event_date_time),
+  DATETIME(TIMESTAMP(event_date_time, 'UTC'), c.time_zone ) AS event_date_time,
+FROM raw_data
+JOIN ${ref('google_ad_ids')} c USING (customer_id)
