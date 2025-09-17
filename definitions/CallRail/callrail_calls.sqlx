@@ -60,7 +60,11 @@ SELECT
   IF(
         REGEXP_CONTAINS(LOWER(tag_names), 'qualified lead')
         AND NOT REGEXP_CONTAINS(LOWER(tag_names), 'unqualified')
-    , 'Verified', 'Not Verified') is_verified_lead
+    , 'Verified', 'Not Verified') is_verified_lead,
+
+  CASE WHEN REGEXP_CONTAINS(LOWER(tag_names), 'booked') AND NOT REGEXP_CONTAINS(LOWER(tag_names), 'not') THEN 'Booked'
+    ELSE 'Not Booked'
+  END AS is_booked
 
 FROM callrail.Calls c
 LEFT JOIN ${ref("callrail_call_tags")} USING (id, company_id)
