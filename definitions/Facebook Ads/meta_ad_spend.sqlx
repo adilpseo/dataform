@@ -34,7 +34,7 @@ SELECT
   inline_link_clicks AS clicks,
 
   client_id,
-  client_name
+  client_name,
   clientkey,
   lid,
 
