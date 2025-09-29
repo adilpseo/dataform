@@ -1,0 +1,35 @@
+config {
+  type: "table"
+}
+
+WITH ad_accounts AS (
+  SELECT DISTINCT 
+    id AS account_id,
+    name AS account_name
+  FROM facebook_ads.account_history
+),
+
+clients AS (
+  SELECT
+    clientkey,
+    lid,
+    facebook_ad_id AS account_id
+  FROM ${ref('master_sheet')}
+  WHERE facebook_ad_id IS NOT NULL
+)
+
+SELECT
+  date,
+  account_id,
+  account_name,
+  campaign_name,
+  adset_name
+  ad_name,
+  spend,
+  impressions,
+  reach,
+  frequency,
+  inline_link_clicks AS clicks
+FROM facebook_ads.basic_all_levels
+JOIN ad_accounts USING (account_id)
+JOIN clients USING (account_id)
