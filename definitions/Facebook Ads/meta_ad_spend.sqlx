@@ -12,7 +12,7 @@ WITH ad_accounts AS (
 clients AS (
   SELECT
     client_id,
-    client_name
+    client_name,
     clientkey,
     lid,
     facebook_ad_id AS account_id
