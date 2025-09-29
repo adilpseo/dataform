@@ -30,6 +30,8 @@ SELECT
 
   gsc_property_id,
 
+  facebook_ad_id,
+
   pct_ad_spend, 
   ad_spend_threshold,
 
