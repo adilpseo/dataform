@@ -8,10 +8,10 @@ WITH clients AS (
     client_name,
     clientkey,
     lid,
-    facebook_ad_id AS account_id
+    bing_ad_id AS account_id
   FROM ${ref('master_sheet')}
-  WHERE bing IS NOT NULL
-)
+  WHERE bing_ad_id IS NOT NULL
+),
 
 bingads_accounts AS (
   SELECT DISTINCT id AS account_id, name AS account_title
@@ -49,7 +49,4 @@ SELECT
 
 FROM bingads.campaign_performance_daily_report b
 JOIN bingads_accounts a USING (account_id)
-JOIN clients c ON
-  CASE WHEN c.bing_campaign_keyword IS NOT NULL THEN REGEXP_CONTAINS(LOWER(b.campaign_name), bing_campaign_keyword)
-  ELSE b.account_id = c.account_id
-  END
+JOIN clients c USING (account_id)
