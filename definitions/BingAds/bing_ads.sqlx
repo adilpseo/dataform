@@ -1,0 +1,55 @@
+config {
+  type: "table"
+}
+
+WITH clients AS (
+  SELECT
+    client_id,
+    client_name,
+    clientkey,
+    lid,
+    facebook_ad_id AS account_id
+  FROM ${ref('master_sheet')}
+  WHERE bing IS NOT NULL
+)
+
+bingads_accounts AS (
+  SELECT DISTINCT id AS account_id, name AS account_title
+  FROM bingads.account_history
+)
+
+
+SELECT
+  b.account_id,
+  b.date,
+  b.campaign_id,
+  b.campaign_name,
+  b.campaign_status,
+  b.currency_code,
+  b.ad_distribution,
+
+  b.spend,
+  b.clicks,
+  b.impressions,
+  b.ctr,
+  b.conversions,
+  b.conversion_rate,
+  b.average_cpc,
+  b.average_position,
+  b.cost_per_conversion,
+  
+  b.device_type,
+  b.device_os,
+
+  c.clientkey,
+  c.client_name,
+
+  a.account_title,
+
+
+FROM bingads.campaign_performance_daily_report b
+JOIN bingads_accounts a USING (account_id)
+JOIN clients c ON
+  CASE WHEN c.bing_campaign_keyword IS NOT NULL THEN REGEXP_CONTAINS(LOWER(b.campaign_name), bing_campaign_keyword)
+  ELSE b.account_id = c.account_id
+  END
