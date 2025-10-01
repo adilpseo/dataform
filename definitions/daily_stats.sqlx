@@ -36,8 +36,28 @@ google_ad_spend AS (
     date,
     SUM(CASE WHEN spend_type = 'LSA Spend' THEN ad_spend END) AS ad_spend_lsa,
     SUM(CASE WHEN spend_type = 'Google Ads Spend' THEN ad_spend END) AS ad_spend_google,
-    SUM(ad_spend) ad_spend_total
+    SUM(ad_spend) google_spend
   FROM ${ref('google_ad_spend')}
+  GROUP BY 1,2,3
+),
+
+meta_ad_spend AS (
+  SELECT
+    clientkey,
+    lid,
+    date,
+    SUM(spend) meta_spend
+  FROM ${ref('meta_ad_spend')}
+  GROUP BY 1,2,3
+),
+
+bing_ad_spend AS (
+  SELECT
+    clientkey,
+    lid,
+    date,
+    SUM(spend) bing_spend
+  FROM ${ref('bing_ads')}
   GROUP BY 1,2,3
 ),
 
@@ -100,7 +120,12 @@ SELECT
 
   g.ad_spend_lsa,
   g.ad_spend_google,
-  g.ad_spend_total,
+  g.google_spend,
+
+  ms.meta_spend,
+  bs.bing_spend,
+
+  IFNULL(g.google_spend, 0) + IFNULL(ms.meta_spend, 0) + IFNULL(bs.bing_spend, 0) AS ad_spend_total,
 
   c.calls_ppc,
   c.calls_gmb,
@@ -134,6 +159,8 @@ LEFT JOIN clients m USING (clientkey, lid)
 LEFT JOIN google_ad_spend g USING (clientkey, lid, date)
 LEFT JOIN daily_calls c USING (clientkey, lid, date)
 LEFT JOIN daily_forms f USING (clientkey, lid, date)
+LEFT JOIN meta_ad_spend ms USING (clientkey, lid, date)
+LEFT JOIN bing_ad_spend bs USING (clientkey, lid, date)
 LEFT JOIN ${ref('google_additional_service_fee')} gas USING (clientkey, lid, date)
 
 

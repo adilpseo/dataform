@@ -43,6 +43,7 @@ SELECT
 
   c.clientkey,
   c.client_name,
+  c.lid,
 
   a.account_title,
 
