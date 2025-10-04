@@ -62,4 +62,5 @@ SELECT
    END AS spend_type
 FROM google_ads_spend AS gads
 LEFT JOIN ${ref("google_ad_ids")} c USING(customer_id)
+LEFT JOIN ${ref('google_ads_impressions')} i USING (campaign_id, date)
 
