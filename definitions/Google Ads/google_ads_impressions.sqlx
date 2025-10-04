@@ -1,0 +1,16 @@
+config {
+  type: "table"
+}
+
+SELECT
+  id AS campaign_id,
+  date,
+
+  AVG(search_impression_share) AS search_impression_share,
+  AVG(search_top_impression_share) AS search_top_impression_share,
+  AVG(search_absolute_top_impression_share) AS search_absolute_top_impression_share,
+  AVG(search_budget_lost_impression_share) AS search_budget_lost_impression_share,
+  AVG(search_rank_lost_impression_share) AS search_rank_lost_impression_share,
+
+FROM google_ads.impressions_report
+GROUP BY 1,2
