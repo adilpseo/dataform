@@ -32,6 +32,7 @@ SELECT
 
   facebook_ad_id,
   bing_ad_id,
+  TRIM(call_auditlink) AS call_auditlink,
 
   pct_ad_spend, 
   ad_spend_threshold,
