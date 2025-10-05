@@ -30,14 +30,13 @@ gsc_data AS (
   SELECT
     date,
     REPLACE(site_url, 'sc-domain:', '') AS gsc_url,
-    device,
-    country,
+    page,
     search_type,
     impressions,
     clicks,
     position
 
-  FROM gsc.search_analytics_site_report_by_site
+  FROM gsc.search_analytics_by_page
 )
 
 SELECT *
