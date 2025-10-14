@@ -15,7 +15,7 @@ WITH raw_data AS (
     phone_call_details_call_recording_url,
     message_details_text,
     ROW_NUMBER() OVER(PARTITION BY local_services_lead_id ORDER BY event_date_time) rn
-  FROM google_ads.local_services_lead_conversations
+  FROM lsa_mcc.local_services_lead_conversations
   -- WHERE conversation_channel = 'PHONE_CALL'
 )
 
