@@ -5,7 +5,8 @@ config {
 
 SELECT 
   client_id,
-  SUBSTR(TO_BASE64(SHA256(CAST(TRIM(client_name) AS STRING))), 1, 8) AS clientkey,
+  SUBSTR(REGEXP_REPLACE(TO_BASE64(SHA256(CAST(client_name AS STRING))),r'[^A-Za-z0-9]', ''),1, 8) AS clientkey,
+  -- SUBSTR(TO_BASE64(SHA256(CAST(TRIM(client_name) AS STRING))), 1, 8) AS clientkey,
   TRIM(client_name) AS client_name,
   PARSE_DATE('%Y/%m/%d', start_date) AS start_date,
   location_id AS lid,
