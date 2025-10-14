@@ -105,11 +105,14 @@ lsa_responsiveness AS (
 )
 
 SELECT
-  m.client_id,
-  m.clientkey,
-  m.lid,
+  d.client_id,
+  d.client_name,
+  d.clientkey,
+  d.lid,
+  d.date,
+  d.month,
+  
   m.client_logo,
-  m.client_name,
   m.start_date,
   m.ghl_id,
   m.callrail_id,
@@ -127,8 +130,7 @@ SELECT
   m.template_name,
   m.account_manager,
 
-  d.date,
-  d.month,
+
 
   g.ad_spend_lsa,
   g.ad_spend_google,
