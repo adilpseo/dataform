@@ -56,3 +56,4 @@ SELECT
   template_name
 
 FROM plumberseo.google_sheets.master_sheet
+WHERE status = 'Active'
