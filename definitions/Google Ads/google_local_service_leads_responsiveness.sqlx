@@ -1,0 +1,87 @@
+config {
+  type: "table",
+  tags: ["hourly"]
+}
+
+WITH consumer_first AS (
+  -- First consumer touch per lead (collapses multiple consumer messages)
+  SELECT
+    customer_id,
+    local_services_lead_id,
+    -- Use timezone-aware date bucketing for your daily charts
+    DATE(TIMESTAMP(event_date_time)) AS lead_date,
+    MIN(TIMESTAMP(event_date_time)) AS first_consumer_event_utc
+  FROM lsa_mcc.local_services_lead_conversations
+  WHERE participant_type = 'CONSUMER'
+  GROUP BY customer_id, local_services_lead_id, lead_date
+),
+
+advertiser_first_response AS (
+  -- First advertiser reply AFTER the first consumer event
+  SELECT
+    c.customer_id,
+    c.local_services_lead_id,
+    c.lead_date,
+    MIN(TIMESTAMP(a.event_date_time)) AS first_advertiser_reply_utc
+  FROM consumer_first c
+  JOIN lsa_mcc.local_services_lead_conversations a
+    ON a.customer_id = c.customer_id
+   AND a.local_services_lead_id = c.local_services_lead_id
+   AND a.participant_type = 'ADVERTISER'
+   AND (
+         -- Count phone calls only if actually answered (duration > 0)
+         (a.conversation_channel = 'PHONE_CALL'
+          AND SAFE_CAST(a.phone_call_details_call_duration_millis AS INT64) > 0)
+         -- Any message/email/sms/booking/API reply counts
+         OR a.conversation_channel IN ('MESSAGE','SMS','EMAIL','BOOKING','ADS_API')
+       )
+   AND TIMESTAMP(a.event_date_time) > c.first_consumer_event_utc
+  GROUP BY c.customer_id, c.local_services_lead_id, c.lead_date
+),
+
+lead_level AS (
+  -- Per-lead response time (minutes) only when responded
+  SELECT
+    c.customer_id,
+    c.local_services_lead_id,
+    c.lead_date,
+    CASE
+      WHEN r.first_advertiser_reply_utc IS NOT NULL THEN
+        TIMESTAMP_DIFF(r.first_advertiser_reply_utc, c.first_consumer_event_utc, MINUTE)
+      ELSE NULL
+    END AS response_time_minutes
+  FROM consumer_first c
+  LEFT JOIN advertiser_first_response r
+    ON r.customer_id = c.customer_id
+   AND r.local_services_lead_id = c.local_services_lead_id
+   AND r.lead_date = c.lead_date
+),
+
+responsiveness AS (
+  SELECT
+    customer_id,
+    lead_date,
+    COUNT(DISTINCT local_services_lead_id) AS total_leads,
+    COUNTIF(response_time_minutes IS NOT NULL) AS responded_leads,
+    SAFE_DIVIDE(COUNTIF(response_time_minutes IS NOT NULL),
+                COUNT(DISTINCT local_services_lead_id)) * 100 AS responsiveness_pct,
+    -- Average over responded leads only
+    AVG(response_time_minutes) AS avg_response_time_minutes
+  FROM lead_level
+  GROUP BY customer_id, lead_date
+  ORDER BY lead_date, customer_id
+)
+
+SELECT
+  r.customer_id,
+  r.lead_date AS date,
+  r.total_leads,
+  r.responded_leads,
+  r.responsiveness_pct,
+  r.avg_response_time_minutes,
+  c.client_name,
+  c.clientkey,
+  c.lid
+
+FROM responsiveness r
+JOIN ${ref('google_ad_ids')} c ON c.customer_id = r.customer_id

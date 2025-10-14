@@ -3,7 +3,6 @@ config {
   tags: ["hourly"]
 }
 
-
 WITH clients AS (
   SELECT
     client_id,
@@ -91,6 +90,18 @@ daily_forms AS (
     COUNT(1) AS daily_forms
   FROM ${ref('ghl_form_submissions')}
   GROUP BY 1,2,3
+),
+
+lsa_responsiveness AS (
+  SELECT
+    clientkey,
+    lid,
+    date,
+    SUM(total_leads) AS total_lsa_leads,
+    SUM(responded_leads) AS total_lsa_responded_leads,
+    AVG(avg_response_time_minutes) AS avg_response_time_minutes
+  FROM ${ref('google_local_service_leads_responsiveness')}
+  GROUP BY 1,2,3
 )
 
 SELECT
@@ -151,7 +162,11 @@ SELECT
 
   ((IFNULL(c.calls_total,0) + IFNULL(f.daily_forms,0)) * IFNULL(m.pseo_leads,1) * IFNULL(m.csr_conversion_rate, 1)) * IFNULL(m.technician_conversion_rate, 0.75) AS technical_conversions,
 
-  (((IFNULL(c.calls_total,0) + IFNULL(f.daily_forms,0)) * IFNULL(m.pseo_leads,1) * IFNULL(m.csr_conversion_rate, 1)) * IFNULL(m.technician_conversion_rate, 0.75)) * IFNULL(CAST(est_average_per_booked_call_transaction_value AS FLOAT64),450) AS projected_revenue
+  (((IFNULL(c.calls_total,0) + IFNULL(f.daily_forms,0)) * IFNULL(m.pseo_leads,1) * IFNULL(m.csr_conversion_rate, 1)) * IFNULL(m.technician_conversion_rate, 0.75)) * IFNULL(CAST(est_average_per_booked_call_transaction_value AS FLOAT64),450) AS projected_revenue,
+
+  lsar.total_lsa_leads AS lsar_total_lsa_leads,
+  lsar.total_lsa_responded_leads AS lsar_total_lsa_responded_leads,
+  lsar.avg_response_time_minutes AS lsar_avg_response_time_minutes
 
 
 
@@ -162,6 +177,8 @@ LEFT JOIN daily_calls c USING (clientkey, lid, date)
 LEFT JOIN daily_forms f USING (clientkey, lid, date)
 LEFT JOIN meta_ad_spend ms USING (clientkey, lid, date)
 LEFT JOIN bing_ad_spend bs USING (clientkey, lid, date)
+LEFT JOIN lsa_responsiveness lsar USING (clientkey, lid, date)
 LEFT JOIN ${ref('google_additional_service_fee')} gas USING (clientkey, lid, date)
+
 
 
