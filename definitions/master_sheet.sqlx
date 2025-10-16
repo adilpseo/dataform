@@ -40,10 +40,10 @@ SELECT
   ad_spend_threshold,
 
   gsc_name,
-  gmb_location_id,
-  gmb_location_id_2,
-  gmb_location_id_3,
-  gmb_location_id_4,
+  CAST(gmb_location_id AS STRING) gmb_location_id,
+  CAST(gmb_location_id_2 AS STRING) gmb_location_id_2,
+  CAST(gmb_location_id_3 AS STRING) gmb_location_id_3,
+  CAST(gmb_location_id_4 AS STRING) gmb_location_id_4,
 
   account_manager,
   status,

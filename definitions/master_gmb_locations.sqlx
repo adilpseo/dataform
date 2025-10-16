@@ -3,24 +3,56 @@ config {
   tags: ["hourly"]
 }
 
-WITH clients AS (
+WITH client_locations AS (
   SELECT 
-    client_id,
-    client_name,
-    start_date,
-    ghl_id,
     clientkey,
+    client_name,
+    lid,
+    gmb_location_id
   FROM ${ref("master_sheet")}
+  WHERE gmb_location_id IS NOT NULL
+
+  UNION ALL
+
+  SELECT 
+    clientkey,
+    client_name,
+    lid,
+    gmb_location_id_2
+  FROM ${ref("master_sheet")}
+  WHERE gmb_location_id_2 IS NOT NULL
+
+  UNION ALL
+
+  SELECT 
+    clientkey,
+    client_name,
+    lid,
+    gmb_location_id_3
+  FROM ${ref("master_sheet")}
+  WHERE gmb_location_id_3 IS NOT NULL
+
+  UNION ALL
+
+  SELECT 
+    clientkey,
+    client_name,
+    lid,
+    gmb_location_id_4
+  FROM ${ref("master_sheet")}
+  WHERE gmb_location_id_4 IS NOT NULL
 ),
 
 gmb_locations AS (
-  SELECT
-    client_id,
-    id AS gmb_location_id,
-    title AS gmb_location_title
-  FROM google_sheets.gmb_locations
+  SELECT 
+    id AS gmb_location_id, 
+    title, 
+    storefront_address_locality, 
+    metadata_maps_uri
+  FROM google_business_profile.location
+  
 )
 
 SELECT *
-FROM gmb_locations
-JOIN clients USING (client_id)
+FROM client_locations
+JOIN gmb_locations USING (gmb_location_id)
