@@ -41,7 +41,10 @@ SELECT
 
   gsc_name,
   gmb_location_id,
-  gmb_name,
+  gmb_location_id_2,
+  gmb_location_id_3,
+  gmb_location_id_4,
+
   account_manager,
   status,
   pct_ad_spend_charge,
