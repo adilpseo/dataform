@@ -40,9 +40,10 @@ SELECT
 
   a.account_name,
   
-  g.client_id,
+
   g.client_name,
-  g.ghl_id,
+  g.clientkey,
+  g.lid,
 
   l.title,
   l.storefront_address_locality,
