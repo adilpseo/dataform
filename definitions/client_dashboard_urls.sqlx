@@ -24,7 +24,12 @@ SELECT
     "%22ds7%22%3A%22", clientkey, "%22%2C",
     "%22ds8%22%3A%22", clientkey, "%22%2C",
     "%22ds9%22%3A%22", clientkey, "%22%2C",
-    "%22ds10%22%3A%22", clientkey, "%22%7D"
+    "%22ds10%22%3A%22", clientkey, "%22%2C",
+    "%22ds11%22%3A%22", clientkey, "%22%2C",
+    "%22ds12%22%3A%22", clientkey, "%22%2C",
+    "%22ds13%22%3A%22", clientkey, "%22%2C",
+    "%22ds14%22%3A%22", clientkey, "%22%2C",
+    "%22ds15%22%3A%22", clientkey, "%22%7D"
   ) AS client_dashboard_url
 
 FROM ${ref('master_sheet')}
