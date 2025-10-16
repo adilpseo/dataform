@@ -21,6 +21,5 @@ WITH raw_data AS (
 
 SELECT * EXCEPT(event_date_time),
   DATETIME(TIMESTAMP(event_date_time, 'UTC'), c.time_zone ) AS event_date_time,
-  descriptive_name,
 FROM raw_data
 JOIN ${ref('google_ad_ids')} c USING (customer_id)
