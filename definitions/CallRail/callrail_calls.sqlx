@@ -8,7 +8,10 @@ WITH tracking_numbers AS (
     company_id,
     tracker_name,
     source_type,
-    TRIM(num) AS tracking_phone_number
+    CASE
+      WHEN STARTS_WITH(TRIM(num), '+') THEN TRIM(num)
+      ELSE CONCAT('+', TRIM(num))
+    END AS  tracking_phone_number
     FROM `google_sheets.callrail_trackers` AS t,
     UNNEST(SPLIT(t.tracking_numbers, ',')) AS num
 
