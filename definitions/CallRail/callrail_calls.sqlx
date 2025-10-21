@@ -3,6 +3,17 @@ config {
   tags: ["hourly"]
 }
 
+WITH tracking_numbers AS (
+    SELECT
+    company_id,
+    tracker_name,
+    source_type,
+    TRIM(num) AS tracking_phone_number
+    FROM `google_sheets.callrail_trackers` AS t,
+    UNNEST(SPLIT(t.tracking_numbers, ',')) AS num
+
+)
+
 SELECT 
   m.client_name,
   m.clientkey,
@@ -44,6 +55,7 @@ SELECT
   c.formatted_customer_location,
   c.formatted_tracking_phone_number,
   c.formatted_tracking_source,
+  c.tracking_phone_number,
 
   CONCAT("https://app.callrail.com/analytics/a/420424648/events/",c.person_id,"?event_id=",c.id,"&event_type=call") AS call_link,
   JSON_EXTRACT_SCALAR(speaker_percent, "$.agent") AS agent_percent,
@@ -65,11 +77,14 @@ SELECT
 
   CASE WHEN REGEXP_CONTAINS(LOWER(tag_names), 'booked') AND NOT REGEXP_CONTAINS(LOWER(tag_names), 'not') THEN 'Booked'
     ELSE 'Not Booked'
-  END AS is_booked
+  END AS is_booked,
+
+  t.tracker_name
 
 FROM callrail.Calls c
 LEFT JOIN ${ref("callrail_call_tags")} USING (id, company_id)
 JOIN ${ref("master_sheet")} m ON c.company_id = m.callrail_id
 JOIN ${ref("callrail_source_attribution")} s ON c.source = s.source
 JOIN callrail.Companies p ON c.company_id = p.id
+LEFT JOIN tracking_numbers t USING (company_id, tracking_phone_number)
 
