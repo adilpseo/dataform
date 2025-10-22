@@ -1,0 +1,20 @@
+config {
+  type: "table",
+  tags: ["hourly"]
+}
+
+SELECT
+  id,
+  name AS tracker_name,
+  type,
+  status,
+  created_at,
+  disabled_at,
+  sms_supported,
+  whisper_message,
+  JSON_EXTRACT_SCALAR(company, '$.id') AS company_id,
+  destination_number,
+  JSON_EXTRACT_SCALAR(number) AS tracking_phone_number
+  
+FROM callrail.Trackers,
+UNNEST(JSON_EXTRACT_ARRAY(tracking_numbers)) AS number

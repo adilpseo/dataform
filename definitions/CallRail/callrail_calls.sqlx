@@ -3,20 +3,6 @@ config {
   tags: ["hourly"]
 }
 
-WITH tracking_numbers AS (
-    SELECT
-    company_id,
-    tracker_name,
-    source_type,
-    CASE
-      WHEN STARTS_WITH(TRIM(num), '+') THEN TRIM(num)
-      ELSE CONCAT('+', TRIM(num))
-    END AS  tracking_phone_number
-    FROM `google_sheets.callrail_trackers` AS t,
-    UNNEST(SPLIT(t.tracking_numbers, ',')) AS num
-
-)
-
 SELECT 
   m.client_name,
   m.clientkey,
@@ -89,5 +75,5 @@ LEFT JOIN ${ref("callrail_call_tags")} USING (id, company_id)
 JOIN ${ref("master_sheet")} m ON c.company_id = m.callrail_id
 JOIN ${ref("callrail_source_attribution")} s ON c.source = s.source
 JOIN callrail.Companies p ON c.company_id = p.id
-LEFT JOIN tracking_numbers t USING (company_id, tracking_phone_number)
+LEFT JOIN ${ref('callrail_trackers')} t USING (company_id, tracking_phone_number)
 
