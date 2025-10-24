@@ -3,44 +3,91 @@ config {
   tags: ["hourly"]
 }
 
-WITH call_sources AS (
-  SELECT DISTINCT source
-  FROM callrail.Calls
+
+WITH trackers AS (
+  SELECT DISTINCT tracker_name
+  FROM ${ref('callrail_trackers')}
 )
 
 SELECT
-  source,
+  tracker_name,
+    CASE
+      WHEN 
+        (REGEXP_CONTAINS(TRIM(LOWER(tracker_name)), 'google my business')
+        OR REGEXP_CONTAINS(TRIM(LOWER(tracker_name)), 'google business profile')
+        OR REGEXP_CONTAINS(TRIM(LOWER(tracker_name)), 'online presence')
+        OR REGEXP_CONTAINS(TRIM(tracker_name), 'GBP'))
+      THEN 'GBP'
+
+      WHEN 
+        REGEXP_CONTAINS(LOWER(tracker_name), 'gls') 
+        OR REGEXP_CONTAINS(tracker_name, 'LSA') 
+      THEN 'LSA'
+
+      WHEN REGEXP_CONTAINS(TRIM(LOWER(tracker_name)), 'seo') THEN 'SEO'
+
+      WHEN REGEXP_CONTAINS(TRIM(LOWER(tracker_name)), 'direct') OR REGEXP_CONTAINS(TRIM(LOWER(tracker_name)), 'organic') THEN 'Direct'
+
+      WHEN 
+        REGEXP_CONTAINS(LOWER(tracker_name), 'google ad') 
+        AND NOT REGEXP_CONTAINS(LOWER(tracker_name), 'lsa') 
+        OR REGEXP_CONTAINS(LOWER(tracker_name), 'paid')
+        OR REGEXP_CONTAINS(LOWER(tracker_name), 'ppc')
+        OR REGEXP_CONTAINS(LOWER(tracker_name), 'ads')
+        OR REGEXP_CONTAINS(LOWER(tracker_name), 'ad')
+      THEN 'PPC'
+
+    ELSE 'SEO'
+  END source_attribution,
+
   CASE
-    WHEN 
-      REGEXP_CONTAINS(LOWER(source), 'google ad') 
-      AND NOT REGEXP_CONTAINS(LOWER(source), 'lsa') 
-      OR REGEXP_CONTAINS(LOWER(source), 'paid')
-      OR REGEXP_CONTAINS(LOWER(source), 'ppc')
-    THEN 'PPC'
-    
-    WHEN REGEXP_CONTAINS(LOWER(source), 'facebook') THEN 'Facebook'
-    
-    WHEN 
-      REGEXP_CONTAINS(LOWER(source), 'gls') 
-      OR REGEXP_CONTAINS(source, 'LSA') 
-    THEN 'LSA'
-    
-    WHEN 
-      (REGEXP_CONTAINS(TRIM(LOWER(source)), 'google my business')
-      OR REGEXP_CONTAINS(TRIM(LOWER(source)), 'google business profile')
-      OR REGEXP_CONTAINS(TRIM(LOWER(source)), 'online presence')
-      OR REGEXP_CONTAINS(TRIM(source), 'GBP'))
-    THEN 'GBP'
+    WHEN REGEXP_CONTAINS(TRIM(LOWER(tracker_name)), 'google') THEN 'Google'
+    WHEN REGEXP_CONTAINS(TRIM(LOWER(tracker_name)), 'bing') OR REGEXP_CONTAINS(TRIM(LOWER(tracker_name)), 'microsoft') THEN 'Microsoft'
+    WHEN REGEXP_CONTAINS(TRIM(LOWER(tracker_name)), 'facebook') THEN 'Facebook'
+    ELSE 'Others'
+  END AS source_platform
 
-    WHEN 
-      REGEXP_CONTAINS(TRIM(LOWER(source)), 'direct')
-    THEN 'Direct'
+FROM trackers
 
-    WHEN 
-      REGEXP_CONTAINS(TRIM(LOWER(source)), 'bing ads')
-    THEN 'Bing Ads'
+
+-- WITH call_sources AS (
+--   SELECT DISTINCT source
+--   FROM callrail.Calls
+-- )
+
+-- SELECT
+--   source,
+--   CASE
+--     WHEN 
+--       REGEXP_CONTAINS(LOWER(source), 'google ad') 
+--       AND NOT REGEXP_CONTAINS(LOWER(source), 'lsa') 
+--       OR REGEXP_CONTAINS(LOWER(source), 'paid')
+--       OR REGEXP_CONTAINS(LOWER(source), 'ppc')
+--     THEN 'PPC'
+    
+--     WHEN REGEXP_CONTAINS(LOWER(source), 'facebook') THEN 'Facebook'
+    
+--     WHEN 
+--       REGEXP_CONTAINS(LOWER(source), 'gls') 
+--       OR REGEXP_CONTAINS(source, 'LSA') 
+--     THEN 'LSA'
+    
+--     WHEN 
+--       (REGEXP_CONTAINS(TRIM(LOWER(source)), 'google my business')
+--       OR REGEXP_CONTAINS(TRIM(LOWER(source)), 'google business profile')
+--       OR REGEXP_CONTAINS(TRIM(LOWER(source)), 'online presence')
+--       OR REGEXP_CONTAINS(TRIM(source), 'GBP'))
+--     THEN 'GBP'
+
+--     WHEN 
+--       REGEXP_CONTAINS(TRIM(LOWER(source)), 'direct')
+--     THEN 'Direct'
+
+--     WHEN 
+--       REGEXP_CONTAINS(TRIM(LOWER(source)), 'bing ads')
+--     THEN 'Bing Ads'
   
-  ELSE 'SEO'
-END source_attribution,
+--   ELSE 'SEO'
+-- END source_attribution,
 
-FROM call_sources
+-- FROM call_sources
