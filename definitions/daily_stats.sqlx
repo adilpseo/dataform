@@ -67,10 +67,10 @@ daily_calls AS (
     lid,
     DATE(created_at) AS date,
 
-    COUNT(CASE WHEN source_type = 'PPC' THEN id END) AS calls_ppc,
-    COUNT(CASE WHEN source_type = 'GBP' THEN id END) AS calls_gmb,
-    COUNT(CASE WHEN source_type = 'SEO' THEN id END) AS calls_seo,
-    COUNT(CASE WHEN source_type = 'LSA' THEN id END) AS calls_lsa,
+    COUNT(CASE WHEN source_attribution = 'PPC' THEN id END) AS calls_ppc,
+    COUNT(CASE WHEN source_attribution = 'GBP' THEN id END) AS calls_gmb,
+    COUNT(CASE WHEN source_attribution = 'SEO' THEN id END) AS calls_seo,
+    COUNT(CASE WHEN source_attribution = 'LSA' THEN id END) AS calls_lsa,
     COUNT(id) AS calls_total,
     COUNT(CASE WHEN formatted_call_type = 'Answered Call' THEN id END) AS calls_answered
 
