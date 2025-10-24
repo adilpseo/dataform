@@ -77,7 +77,7 @@ LEFT JOIN ${ref("callrail_call_tags")} USING (id, company_id)
 JOIN ${ref("master_sheet")} m ON c.company_id = m.callrail_id
 JOIN callrail.Companies p ON c.company_id = p.id
 LEFT JOIN ${ref('callrail_trackers')} t USING (company_id, tracking_phone_number)
-JOIN ${ref("callrail_source_attribution")} s ON s.tracker_name = t.tracking_phone_number
+JOIN ${ref("callrail_source_attribution")} s ON s.tracker_name = t.tracker_name
 
 
 
