@@ -1,0 +1,7 @@
+SELECT
+  l.*,
+  m.client_name,
+  m.clientkey,
+  m.lid
+FROM aicc-452721.calls_prod.calls l
+JOIN ${ref('master_sheet')} m ON l.company_id = m.callrail_id
