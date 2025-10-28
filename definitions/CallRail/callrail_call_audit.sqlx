@@ -1,3 +1,8 @@
+config {
+  type: "table",
+  tags: ["daily"]
+}
+
 SELECT
   l.*,
   m.client_name,
