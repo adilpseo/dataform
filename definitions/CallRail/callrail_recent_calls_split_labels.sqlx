@@ -1,0 +1,12 @@
+config {
+  type: "table",
+  tags: ["daily"]
+}
+
+SELECT
+  l.*,
+  m.client_name,
+  m.clientkey,
+  m.lid
+FROM aicc-452721.calls_prod.recent_calls_split_labels l
+JOIN ${ref('master_sheet')} m ON l.company_id = m.callrail_id
