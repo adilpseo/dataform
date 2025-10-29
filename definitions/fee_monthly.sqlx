@@ -13,8 +13,8 @@ WITH clients AS (
     ghl_id,
     callrail_id,
     IFNULL(monthly_management_fee,0) monthly_management_fee,
-    IFNULL(seo_management,0) seo_management,
-    IFNULL(ppc_management,0) ppc_management
+    -- IFNULL(seo_management,0) seo_management,
+    -- IFNULL(ppc_management,0) ppc_management
   FROM ${ref('master_sheet')}
 ),
 
@@ -35,9 +35,10 @@ SELECT
   ghl_id,
   callrail_id,
   monthly_management_fee,
-  seo_management,
-  ppc_management,
-  monthly_management_fee + seo_management + ppc_management AS monthly_fee,
+  -- seo_management,
+  -- ppc_management,
+  -- monthly_management_fee + seo_management + ppc_management AS monthly_fee,
+  monthly_management_fee AS monthly_fee,
   month
 FROM months
 JOIN clients USING (clientkey, lid)

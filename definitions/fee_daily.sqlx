@@ -10,7 +10,7 @@ WITH clients AS (
     lid,
     ghl_id,
     callrail_id,
-    IFNULL(daily_management_fee,0) daily_management_fee,
+    IFNULL((monthly_management_fee * 12)/ 365,0) daily_management_fee,
   FROM ${ref('master_sheet')}
 )
 

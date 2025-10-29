@@ -16,10 +16,10 @@ WITH clients AS (
     account_manager,
     pct_ad_spend,
     ad_spend_threshold,
-    daily_management_fee,
+    -- daily_management_fee,
     monthly_management_fee,
-    seo_management,
-    ppc_management,
+    -- seo_management,
+    -- ppc_management,
     est_lead_to_service_call_ratio,
     est_average_per_booked_call_transaction_value,
     pseo_leads,
@@ -118,10 +118,10 @@ SELECT
   m.callrail_id,
   m.ad_spend_threshold,
   m.pct_ad_spend,
-  m.daily_management_fee,
+--   m.daily_management_fee,
   m.monthly_management_fee,
-  m.seo_management,
-  m.ppc_management,
+--   m.seo_management,
+--   m.ppc_management,
   m.est_lead_to_service_call_ratio,
   m.est_average_per_booked_call_transaction_value,
   m.pseo_leads,
@@ -158,7 +158,9 @@ SELECT
 
   (IFNULL(c.calls_total,0) + IFNULL(f.daily_forms,0)) * IFNULL(m.pseo_leads, 0.85) AS qualified_leads,
   
-  ((IFNULL(m.monthly_management_fee,0) + IFNULL(m.seo_management,0) + IFNULL(m.ppc_management,0)) * 12) / 365 AS daily_service_fee,
+--   ((IFNULL(m.monthly_management_fee,0) + IFNULL(m.seo_management,0) + IFNULL(m.ppc_management,0)) * 12) / 365 AS daily_service_fee,
+
+    ((IFNULL(m.monthly_management_fee,0)) * 12) / 365 AS daily_service_fee,
 
   (IFNULL(c.calls_total,0) + IFNULL(f.daily_forms,0)) * IFNULL(m.pseo_leads,1) * IFNULL(m.csr_conversion_rate, 0.85) AS csr_conversions,
 
