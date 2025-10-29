@@ -13,6 +13,7 @@ WITH accounts AS (
   SELECT id AS customer_id, descriptive_name, time_zone
   FROM lsa_mcc.account_history
   WHERE _fivetran_active IS TRUE
+  AND id NOT IN (SELECT DISTINCT id FROM google_ads.account_history)
 ),
 
 google_ad_ids AS (

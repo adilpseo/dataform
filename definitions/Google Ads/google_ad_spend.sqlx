@@ -21,6 +21,7 @@ WITH google_campaigns AS (
     name AS campaign_name
   FROM lsa_mcc.campaign_history
   WHERE _fivetran_active IS TRUE
+  AND customer_id NOT IN (SELECT DISTINCT id FROM google_ads.account_history)
 ),
 
 compaign_stats AS (
@@ -46,6 +47,7 @@ compaign_stats AS (
     SUM(impressions) AS impressions,
     SUM(conversions) AS conversions
   FROM lsa_mcc.campaign_stats
+  WHERE customer_id NOT IN (SELECT DISTINCT id FROM google_ads.account_history)
   GROUP BY date, customer_id, id
 ),
 
