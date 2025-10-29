@@ -24,9 +24,13 @@ SELECT
         OR REGEXP_CONTAINS(tracker_name, 'LSA') 
       THEN 'LSA'
 
-      WHEN REGEXP_CONTAINS(TRIM(LOWER(tracker_name)), 'seo') THEN 'SEO'
+      WHEN 
+        REGEXP_CONTAINS(TRIM(LOWER(tracker_name)), 'seo')
+        OR REGEXP_CONTAINS(TRIM(LOWER(tracker_name)), 'direct') 
+        OR REGEXP_CONTAINS(TRIM(LOWER(tracker_name)), 'organic')
+      THEN 'SEO'
 
-      WHEN REGEXP_CONTAINS(TRIM(LOWER(tracker_name)), 'direct') OR REGEXP_CONTAINS(TRIM(LOWER(tracker_name)), 'organic') THEN 'Direct'
+    --   WHEN REGEXP_CONTAINS(TRIM(LOWER(tracker_name)), 'direct') OR REGEXP_CONTAINS(TRIM(LOWER(tracker_name)), 'organic') THEN 'Direct'
 
       WHEN 
         REGEXP_CONTAINS(LOWER(tracker_name), 'google ad') 
