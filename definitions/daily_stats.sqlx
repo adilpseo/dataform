@@ -70,7 +70,7 @@ daily_calls AS (
     COUNT(CASE WHEN source_attribution = 'PPC' THEN id END) AS calls_ppc,
     COUNT(CASE WHEN source_attribution = 'GBP' THEN id END) AS calls_gmb,
     COUNT(CASE WHEN source_attribution = 'SEO' THEN id END) AS calls_seo,
-    COUNT(CASE WHEN source_attribution = 'LSA' THEN id END) AS calls_lsa,
+    -- COUNT(CASE WHEN source_attribution = 'LSA' THEN id END) AS calls_lsa,
     COUNT(id) AS calls_total,
     COUNT(CASE WHEN formatted_call_type = 'Answered Call' THEN id END) AS calls_answered
 
@@ -89,6 +89,17 @@ daily_forms AS (
     COUNT(CASE WHEN form_source_category = 'SEO' THEN submission_id END) AS forms_seo,
     COUNT(1) AS daily_forms
   FROM ${ref('ghl_form_submissions')}
+  GROUP BY 1,2,3
+),
+
+lsa_leads AS (
+  SELECT
+    clientkey,
+    lid,
+    DATE(created_at) date,
+    -- LSA Calls are pulled from local service leads table
+    COUNT(IF(lead_type = 'PHONE_CALL', lead_id, NULL)) AS calls_lsa
+  FROM ${ref('google_local_service_leads')}
   GROUP BY 1,2,3
 ),
 
@@ -114,91 +125,98 @@ gmb_reviews AS (
 
   FROM ${ref('gmb_reviews')}
   GROUP BY 1,2,3
+),
+
+final AS (
+    SELECT
+    d.client_id,
+    d.client_name,
+    d.clientkey,
+    d.lid,
+    d.date,
+    d.month,
+    
+    m.client_logo,
+    m.start_date,
+    m.ghl_id,
+    m.callrail_id,
+    m.ad_spend_threshold,
+    m.pct_ad_spend,
+    --   m.daily_management_fee,
+    m.monthly_management_fee,
+    --   m.seo_management,
+    --   m.ppc_management,
+    m.est_lead_to_service_call_ratio,
+    m.est_average_per_booked_call_transaction_value,
+    m.pseo_leads,
+    
+    m.csr_conversion_rate,
+    m.technician_conversion_rate,
+    m.template_name,
+    m.account_manager,
+
+
+
+    COALESCE(g.ad_spend_lsa, 0) AS ad_spend_lsa,
+    COALESCE(g.ad_spend_google, 0) AS ad_spend_google,
+    COALESCE(g.google_spend, 0) AS google_spend,
+
+    COALESCE(ms.meta_spend, 0) AS meta_spend,
+    COALESCE(bs.bing_spend, 0) AS bing_spend,
+
+    COALESCE(c.calls_ppc, 0) AS calls_ppc,
+    COALESCE(c.calls_gmb, 0) AS calls_gmb,
+    COALESCE(c.calls_seo, 0) AS calls_seo,
+    --   c.calls_lsa,
+    COALESCE(c.calls_total, 0) AS calls_total,
+
+    COALESCE(ls.calls_lsa, 0) AS calls_lsa,
+
+    COALESCE(f.forms_ppc, 0) AS forms_ppc,
+    COALESCE(f.forms_lsa, 0) AS forms_lsa,
+    COALESCE(f.forms_seo, 0) AS forms_seo,
+    COALESCE(f.daily_forms, 0) AS daily_forms,
+
+    COALESCE(gas.add_service_fee, 0) AS add_service_fee,
+
+    IFNULL(c.calls_ppc,0) + IFNULL(c.calls_gmb,0) + IFNULL(c.calls_seo,0) + IFNULL(ls.calls_lsa,0) + IFNULL(f.daily_forms, 0) AS total_leads,
+
+    lsar.total_lsa_leads AS lsar_total_lsa_leads,
+    lsar.total_lsa_responded_leads AS lsar_total_lsa_responded_leads,
+    lsar.avg_response_time_minutes AS lsar_avg_response_time_minutes,
+
+    gmbr.total_reviews,
+    gmbr.total_reviews_fivestar
+
+
+    FROM ${ref('_dates')} d
+    LEFT JOIN clients m USING (clientkey, lid)
+    LEFT JOIN google_ad_spend g USING (clientkey, lid, date)
+    LEFT JOIN daily_calls c USING (clientkey, lid, date)
+    LEFT JOIN daily_forms f USING (clientkey, lid, date)
+    LEFT JOIN meta_ad_spend ms USING (clientkey, lid, date)
+    LEFT JOIN bing_ad_spend bs USING (clientkey, lid, date)
+    LEFT JOIN lsa_responsiveness lsar USING (clientkey, lid, date)
+    LEFT JOIN gmb_reviews gmbr USING (clientkey, lid, date)
+    LEFT JOIN lsa_leads ls USING (clientkey, lid, date)
+    LEFT JOIN ${ref('google_additional_service_fee')} gas USING (clientkey, lid, date)
 )
 
-SELECT
-  d.client_id,
-  d.client_name,
-  d.clientkey,
-  d.lid,
-  d.date,
-  d.month,
-  
-  m.client_logo,
-  m.start_date,
-  m.ghl_id,
-  m.callrail_id,
-  m.ad_spend_threshold,
-  m.pct_ad_spend,
---   m.daily_management_fee,
-  m.monthly_management_fee,
---   m.seo_management,
---   m.ppc_management,
-  m.est_lead_to_service_call_ratio,
-  m.est_average_per_booked_call_transaction_value,
-  m.pseo_leads,
-  m.csr_conversion_rate,
-  m.technician_conversion_rate,
-  m.template_name,
-  m.account_manager,
+SELECT *,
+
+  (IFNULL(monthly_management_fee,0) * 12) / 365 AS daily_service_fee,
+
+  google_spend + meta_spend + bing_spend AS ad_spend_total,
+
+  total_leads * IFNULL(pseo_leads, 0.85) AS qualified_leads,
+
+  total_leads * IFNULL(pseo_leads,1) * IFNULL(csr_conversion_rate, 0.85) AS csr_conversions,
+
+  (total_leads * IFNULL(pseo_leads,1) * IFNULL(csr_conversion_rate, 1)) * IFNULL(technician_conversion_rate, 0.75) AS technical_conversions,
+
+  (total_leads * IFNULL(pseo_leads,1) * IFNULL(csr_conversion_rate, 1) * IFNULL(technician_conversion_rate, 0.75)) * IFNULL(CAST(est_average_per_booked_call_transaction_value AS FLOAT64),450) AS projected_revenue,
 
 
-
-  g.ad_spend_lsa,
-  g.ad_spend_google,
-  g.google_spend,
-
-  ms.meta_spend,
-  bs.bing_spend,
-
-  IFNULL(g.google_spend, 0) + IFNULL(ms.meta_spend, 0) + IFNULL(bs.bing_spend, 0) AS ad_spend_total,
-
-  c.calls_ppc,
-  c.calls_gmb,
-  c.calls_seo,
-  c.calls_lsa,
-  c.calls_total,
-
-  f.forms_ppc,
-  f.forms_lsa,
-  f.forms_seo,
-  f.daily_forms,
-
-  gas.add_service_fee,
-
-  IFNULL(c.calls_total,0) + IFNULL(f.daily_forms,0) AS total_leads,
-
-  (IFNULL(c.calls_total,0) + IFNULL(f.daily_forms,0)) * IFNULL(m.pseo_leads, 0.85) AS qualified_leads,
-  
---   ((IFNULL(m.monthly_management_fee,0) + IFNULL(m.seo_management,0) + IFNULL(m.ppc_management,0)) * 12) / 365 AS daily_service_fee,
-
-    ((IFNULL(m.monthly_management_fee,0)) * 12) / 365 AS daily_service_fee,
-
-  (IFNULL(c.calls_total,0) + IFNULL(f.daily_forms,0)) * IFNULL(m.pseo_leads,1) * IFNULL(m.csr_conversion_rate, 0.85) AS csr_conversions,
-
-  ((IFNULL(c.calls_total,0) + IFNULL(f.daily_forms,0)) * IFNULL(m.pseo_leads,1) * IFNULL(m.csr_conversion_rate, 1)) * IFNULL(m.technician_conversion_rate, 0.75) AS technical_conversions,
-
-  (((IFNULL(c.calls_total,0) + IFNULL(f.daily_forms,0)) * IFNULL(m.pseo_leads,1) * IFNULL(m.csr_conversion_rate, 1)) * IFNULL(m.technician_conversion_rate, 0.75)) * IFNULL(CAST(est_average_per_booked_call_transaction_value AS FLOAT64),450) AS projected_revenue,
-
-  lsar.total_lsa_leads AS lsar_total_lsa_leads,
-  lsar.total_lsa_responded_leads AS lsar_total_lsa_responded_leads,
-  lsar.avg_response_time_minutes AS lsar_avg_response_time_minutes,
-
-  gmbr.total_reviews,
-  gmbr.total_reviews_fivestar
-
-
-
-FROM ${ref('_dates')} d
-LEFT JOIN clients m USING (clientkey, lid)
-LEFT JOIN google_ad_spend g USING (clientkey, lid, date)
-LEFT JOIN daily_calls c USING (clientkey, lid, date)
-LEFT JOIN daily_forms f USING (clientkey, lid, date)
-LEFT JOIN meta_ad_spend ms USING (clientkey, lid, date)
-LEFT JOIN bing_ad_spend bs USING (clientkey, lid, date)
-LEFT JOIN lsa_responsiveness lsar USING (clientkey, lid, date)
-LEFT JOIN gmb_reviews gmbr USING (clientkey, lid, date)
-LEFT JOIN ${ref('google_additional_service_fee')} gas USING (clientkey, lid, date)
-
+FROM final
 
 
