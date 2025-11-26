@@ -102,6 +102,18 @@ lsa_responsiveness AS (
     AVG(avg_response_time_minutes) AS avg_response_time_minutes
   FROM ${ref('google_local_service_leads_responsiveness')}
   GROUP BY 1,2,3
+),
+
+gmb_reviews AS (
+  SELECT
+    clientkey,
+    lid,
+    DATE(create_time) date,
+    COUNT(1) AS total_reviews,
+    COUNT(IF(rating = 5, 1, NULL)) AS total_reviews_fivestar,
+
+  FROM ${ref('gmb_reviews')}
+  GROUP BY 1,2,3
 )
 
 SELECT
@@ -170,7 +182,10 @@ SELECT
 
   lsar.total_lsa_leads AS lsar_total_lsa_leads,
   lsar.total_lsa_responded_leads AS lsar_total_lsa_responded_leads,
-  lsar.avg_response_time_minutes AS lsar_avg_response_time_minutes
+  lsar.avg_response_time_minutes AS lsar_avg_response_time_minutes,
+
+  gmbr.total_reviews,
+  gmbr.total_reviews_fivestar
 
 
 
@@ -182,6 +197,7 @@ LEFT JOIN daily_forms f USING (clientkey, lid, date)
 LEFT JOIN meta_ad_spend ms USING (clientkey, lid, date)
 LEFT JOIN bing_ad_spend bs USING (clientkey, lid, date)
 LEFT JOIN lsa_responsiveness lsar USING (clientkey, lid, date)
+LEFT JOIN gmb_reviews gmbr USING (clientkey, lid, date)
 LEFT JOIN ${ref('google_additional_service_fee')} gas USING (clientkey, lid, date)
 
 
