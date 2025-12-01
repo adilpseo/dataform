@@ -97,6 +97,7 @@ lsa_leads AS (
     clientkey,
     lid,
     DATE(created_at) date,
+    COUNT(1) AS lsa_leads,
     -- LSA Calls are pulled from local service leads table
     COUNT(IF(lead_type = 'PHONE_CALL', lead_id, NULL)) AS calls_lsa
   FROM ${ref('google_local_service_leads')}
@@ -171,6 +172,7 @@ final AS (
     COALESCE(c.calls_total, 0) AS calls_total,
 
     COALESCE(ls.calls_lsa, 0) AS calls_lsa,
+    COALESCE(ls.lsa_leads, 0) AS lsa_leads,
 
     COALESCE(f.forms_ppc, 0) AS forms_ppc,
     COALESCE(f.forms_lsa, 0) AS forms_lsa,
@@ -179,7 +181,7 @@ final AS (
 
     COALESCE(gas.add_service_fee, 0) AS add_service_fee,
 
-    IFNULL(c.calls_ppc,0) + IFNULL(c.calls_gmb,0) + IFNULL(c.calls_seo,0) + IFNULL(ls.calls_lsa,0) + IFNULL(f.daily_forms, 0) AS total_leads,
+    IFNULL(c.calls_ppc,0) + IFNULL(c.calls_gmb,0) + IFNULL(c.calls_seo,0) + IFNULL(ls.lsa_leads,0) + IFNULL(f.daily_forms, 0) AS total_leads,
 
     lsar.total_lsa_leads AS lsar_total_lsa_leads,
     lsar.total_lsa_responded_leads AS lsar_total_lsa_responded_leads,
