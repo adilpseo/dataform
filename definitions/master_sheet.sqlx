@@ -50,6 +50,7 @@ SELECT
   pct_ad_spend_charge,
   -- SAFE_CAST(daily_management_fee AS FLOAT64) daily_management_fee,
   SAFE_CAST(monthly_management_fee AS FLOAT64) monthly_management_fee,
+  SAFE_CAST(lsa_management_fee AS FLOAT64) lsa_management_fee,
   -- SAFE_CAST(seo_management AS FLOAT64) seo_management,
   -- SAFE_CAST(ppc_management AS FLOAT64) ppc_management,
   est_lead_to_service_call_ratio,

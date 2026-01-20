@@ -18,6 +18,7 @@ WITH clients AS (
     ad_spend_threshold,
     -- daily_management_fee,
     monthly_management_fee,
+    lsa_management_fee,
     -- seo_management,
     -- ppc_management,
     est_lead_to_service_call_ratio,
@@ -145,6 +146,7 @@ final AS (
     m.pct_ad_spend,
     --   m.daily_management_fee,
     m.monthly_management_fee,
+    m.lsa_management_fee,
     --   m.seo_management,
     --   m.ppc_management,
     m.est_lead_to_service_call_ratio,
@@ -207,6 +209,7 @@ final AS (
 SELECT *,
 
   (IFNULL(monthly_management_fee,0) * 12) / 365 AS daily_service_fee,
+  (IFNULL(lsa_management_fee,0) * 12) / 365 AS daily_lsa_fee,
 
   google_spend + meta_spend + bing_spend AS ad_spend_total,
 
