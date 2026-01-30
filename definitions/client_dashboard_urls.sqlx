@@ -3,33 +3,48 @@ config {
   tags: ["hourly"]
 }
 
+WITH base_url AS (
+  SELECT
+    clientkey,
+    client_name,
 
-SELECT
-  client_id,
-  client_name,
+    -- call audit looke url
+    call_auditlink,
+    template_name,
 
-  -- call audit looke url
-  call_auditlink,
+    -- PSEO
+    -- https://lookerstudio.google.com/reporting/4a46e996-b05c-4a8c-b05f-f3465a6f3c9b
 
-  -- https://lookerstudio.google.com/reporting/4a46e996-b05c-4a8c-b05f-f3465a6f3c9b
+    -- CLIC
+    -- https://lookerstudio.google.com/reporting/6a533fe5-1b86-4a6a-849e-a819db203fda
 
-  CONCAT(
-    "https://lookerstudio.google.com/reporting/4a46e996-b05c-4a8c-b05f-f3465a6f3c9b?params=%7B",
-    "%22ds1%22%3A%22", clientkey, "%22%2C",
-    "%22ds2%22%3A%22", clientkey, "%22%2C",
-    "%22ds3%22%3A%22", clientkey, "%22%2C",
-    "%22ds4%22%3A%22", clientkey, "%22%2C",
-    "%22ds5%22%3A%22", clientkey, "%22%2C",
-    "%22ds6%22%3A%22", clientkey, "%22%2C",
-    "%22ds7%22%3A%22", clientkey, "%22%2C",
-    "%22ds8%22%3A%22", clientkey, "%22%2C",
-    "%22ds9%22%3A%22", clientkey, "%22%2C",
-    "%22ds10%22%3A%22", clientkey, "%22%2C",
-    "%22ds11%22%3A%22", clientkey, "%22%2C",
-    "%22ds12%22%3A%22", clientkey, "%22%2C",
-    "%22ds13%22%3A%22", clientkey, "%22%2C",
-    "%22ds14%22%3A%22", clientkey, "%22%2C",
-    "%22ds15%22%3A%22", clientkey, "%22%7D"
-  ) AS client_dashboard_url
+    CASE 
+      WHEN template_name = 'PSEO' THEN "https://lookerstudio.google.com/reporting/4a46e996-b05c-4a8c-b05f-f3465a6f3c9b?params=%7B" 
+      WHEN template_name = 'CLIC' THEN "https://lookerstudio.google.com/reporting/6a533fe5-1b86-4a6a-849e-a819db203fda?params=%7B" 
+    END AS url
+  FROM ${ref('master_sheet')}
+)
 
-FROM ${ref('master_sheet')}
+SELECT * EXCEPT(url),
+
+  CASE WHEN url IS NOT NULL THEN
+    CONCAT(
+      url,
+      "%22ds1%22%3A%22", clientkey, "%22%2C",
+      "%22ds2%22%3A%22", clientkey, "%22%2C",
+      "%22ds3%22%3A%22", clientkey, "%22%2C",
+      "%22ds4%22%3A%22", clientkey, "%22%2C",
+      "%22ds5%22%3A%22", clientkey, "%22%2C",
+      "%22ds6%22%3A%22", clientkey, "%22%2C",
+      "%22ds7%22%3A%22", clientkey, "%22%2C",
+      "%22ds8%22%3A%22", clientkey, "%22%2C",
+      "%22ds9%22%3A%22", clientkey, "%22%2C",
+      "%22ds10%22%3A%22", clientkey, "%22%2C",
+      "%22ds11%22%3A%22", clientkey, "%22%2C",
+      "%22ds12%22%3A%22", clientkey, "%22%2C",
+      "%22ds13%22%3A%22", clientkey, "%22%2C",
+      "%22ds14%22%3A%22", clientkey, "%22%2C",
+      "%22ds15%22%3A%22", clientkey, "%22%7D"
+    ) END AS client_dashboard_url
+
+FROM base_url
