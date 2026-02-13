@@ -58,7 +58,8 @@ SELECT
   pseo_leads_ AS pseo_leads,
   csr_conversion_rate,
   technician_conversion_rate,
-  template_name
+  template_name,
+  "America/New_York" AS time_zone,
 
 FROM plumberseo.google_sheets.master_sheet
 WHERE status = 'Active'

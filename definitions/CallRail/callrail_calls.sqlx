@@ -26,7 +26,7 @@ SELECT
   c.recording_player,
   c.company_id,
   c.call_summary,
-  DATETIME(CAST(c.created_at AS TIMESTAMP), p.time_zone) created_at,
+  DATETIME(CAST(c.created_at AS TIMESTAMP), m.time_zone) created_at,
   c.first_call,
   c.utm_medium,
   c.utm_source,
@@ -51,7 +51,8 @@ SELECT
   JSON_EXTRACT_SCALAR(speaker_percent, "$.customer") AS customer_percent,
   keywords_spotted,
   -- tag_names,
-  REGEXP_EXTRACT(p.script_url, r"/companies/(\d+)/") AS sid,
+  '00000' AS sid,
+--   REGEXP_EXTRACT(p.script_url, r"/companies/(\d+)/") AS sid,
   
   s.source_attribution,
   s.source_platform,
@@ -75,7 +76,7 @@ SELECT
 FROM callrail.Calls c
 LEFT JOIN ${ref("callrail_call_tags")} USING (id, company_id)
 JOIN ${ref("master_sheet")} m ON c.company_id = m.callrail_id
-JOIN callrail.Companies p ON c.company_id = p.id
+-- JOIN callrail.Companies p ON c.company_id = p.id
 LEFT JOIN ${ref('callrail_trackers')} t USING (company_id, tracking_phone_number)
 JOIN ${ref("callrail_source_attribution")} s ON s.tracker_name = t.tracker_name
 

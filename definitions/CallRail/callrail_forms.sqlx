@@ -41,12 +41,13 @@ SELECT
   -- f.utm_medium,
   -- f.lead_status,
   JSON_EXTRACT_SCALAR(f.form_data, "$.reason_for_your_visit") AS reason_for_your_visit,
-  DATETIME(CAST(f.submitted_at AS TIMESTAMP), p.time_zone) submitted_at,
+  DATETIME(CAST(f.submitted_at AS TIMESTAMP), m.time_zone) submitted_at,
   f.formatted_customer_name customer_name,
   f.customer_email,
   f.formatted_customer_phone_number customer_phone_number,
   CAST(t.tag_names AS STRING) tag_names,
-  REGEXP_EXTRACT(p.script_url, r"/companies/(\d+)/") AS sid,
+  '0000' AS sid,
+--   REGEXP_EXTRACT(p.script_url, r"/companies/(\d+)/") AS sid,
   CASE
     WHEN REGEXP_CONTAINS(LOWER(source), 'google ad') AND NOT REGEXP_CONTAINS(LOWER(source), 'lsa') THEN 'Google Ads'
     WHEN REGEXP_CONTAINS(LOWER(source), 'facebook') THEN 'Facebook'
@@ -66,5 +67,5 @@ SELECT
 FROM callrail_forms.Form_Submissions AS f
 LEFT JOIN ${ref("callrail_form_tags")} t USING (id, company_id)
 JOIN ${ref("master_sheet")} m ON f.company_id = m.callrail_id
-JOIN callrail.Companies p ON f.company_id = p.id
+-- JOIN callrail.Companies p ON f.company_id = p.id
 LEFT JOIN form_messages fm ON f.id = fm.id
