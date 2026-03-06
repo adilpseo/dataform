@@ -71,7 +71,7 @@ daily_calls AS (
     COUNT(CASE WHEN source_attribution = 'PPC' THEN id END) AS calls_ppc,
     COUNT(CASE WHEN source_attribution = 'GBP' THEN id END) AS calls_gmb,
     COUNT(CASE WHEN source_attribution = 'SEO' THEN id END) AS calls_seo,
-    -- COUNT(CASE WHEN source_attribution = 'LSA' THEN id END) AS calls_lsa,
+    COUNT(CASE WHEN source_attribution = 'LSA' THEN id END) AS calls_lsa,
     COUNT(id) AS calls_total,
     COUNT(CASE WHEN formatted_call_type = 'Answered Call' THEN id END) AS calls_answered
 
@@ -100,7 +100,7 @@ lsa_leads AS (
     DATE(created_at) date,
     COUNT(1) AS lsa_leads,
     -- LSA Calls are pulled from local service leads table
-    COUNT(IF(lead_type = 'PHONE_CALL', lead_id, NULL)) AS calls_lsa
+    -- COUNT(IF(lead_type = 'PHONE_CALL', lead_id, NULL)) AS calls_lsa
   FROM ${ref('google_local_service_leads')}
   GROUP BY 1,2,3
 ),
@@ -170,10 +170,12 @@ final AS (
     COALESCE(c.calls_ppc, 0) AS calls_ppc,
     COALESCE(c.calls_gmb, 0) AS calls_gmb,
     COALESCE(c.calls_seo, 0) AS calls_seo,
+    COALESCE(c.calls_lsa, 0) AS calls_lsa,
+
     --   c.calls_lsa,
     COALESCE(c.calls_total, 0) AS calls_total,
 
-    COALESCE(ls.calls_lsa, 0) AS calls_lsa,
+    -- COALESCE(ls.calls_lsa, 0) AS calls_lsa,
     COALESCE(ls.lsa_leads, 0) AS lsa_leads,
 
     COALESCE(f.forms_ppc, 0) AS forms_ppc,
