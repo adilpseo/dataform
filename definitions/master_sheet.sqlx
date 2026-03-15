@@ -13,6 +13,7 @@ SELECT
   client_logo,
   ghl_id,
   ghl_name,
+  ghl_pit,
   ga_4_id AS ga4_id,
   ga_4_name AS ga4_name,
   callrail_id,
