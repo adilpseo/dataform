@@ -1,0 +1,59 @@
+config {
+  type: "table",
+  tags: ["daily"]
+}
+
+WITH gmb_data AS (
+  SELECT 
+    location_id AS locationId,
+    DATE(year, month, day) AS date,
+    SUM(CASE WHEN daily_metric = 'BUSINESS_BOOKINGS' THEN value ELSE 0 END) AS business_bookings,
+    SUM(CASE WHEN daily_metric = 'BUSINESS_CONVERSATIONS' THEN value ELSE 0 END) AS business_conversations,
+    SUM(CASE WHEN daily_metric = 'BUSINESS_DIRECTION_REQUESTS' THEN value ELSE 0 END) AS business_direction_requests,
+    SUM(CASE WHEN daily_metric = 'BUSINESS_FOOD_MENU_CLICKS' THEN value ELSE 0 END) AS business_food_menu_clicks,
+    SUM(CASE WHEN daily_metric = 'BUSINESS_FOOD_ORDERS' THEN value ELSE 0 END) AS business_food_orders,
+    SUM(CASE WHEN daily_metric = 'BUSINESS_IMPRESSIONS_DESKTOP_MAPS' THEN value ELSE 0 END) AS business_impressions_desktop_maps,
+    SUM(CASE WHEN daily_metric = 'BUSINESS_IMPRESSIONS_DESKTOP_SEARCH' THEN value ELSE 0 END) AS business_impressions_desktop_search,
+    SUM(CASE WHEN daily_metric = 'BUSINESS_IMPRESSIONS_MOBILE_MAPS' THEN value ELSE 0 END) AS business_impressions_mobile_maps,
+    SUM(CASE WHEN daily_metric = 'BUSINESS_IMPRESSIONS_MOBILE_SEARCH' THEN value ELSE 0 END) AS business_impressions_mobile_search,
+    SUM(CASE WHEN daily_metric = 'CALL_CLICKS' THEN value ELSE 0 END) AS call_clicks,
+    SUM(CASE WHEN daily_metric = 'WEBSITE_CLICKS' THEN value ELSE 0 END) AS website_clicks
+  FROM waterheatersonly.location_insight
+  GROUP BY 1, 2
+),
+
+aggregated AS (
+  SELECT
+    locationId AS location_id,
+    date,
+    business_bookings,
+    business_conversations,
+    business_direction_requests,
+    
+    business_impressions_desktop_maps,
+    business_impressions_mobile_maps,
+    (business_impressions_desktop_maps + business_impressions_mobile_maps) AS map_impressions,
+
+    business_impressions_desktop_search,
+    business_impressions_mobile_search,
+    (business_impressions_desktop_search + business_impressions_mobile_search) AS search_impressions,
+
+    call_clicks AS gbp_call_clicks,
+    website_clicks AS gbp_website_clicks
+
+  FROM gmb_data
+),
+
+gmb_locations AS (
+  SELECT
+    id AS location_id,
+    title AS location_name,
+    storefront_address_locality AS locality,
+    metadata_maps_uri AS website_uri,
+    REGEXP_REPLACE(REGEXP_EXTRACT(website_uri, r'https?://([^/]+)'), r'^www\.', '') AS fqdn
+  FROM `waterheatersonly.location`
+)
+
+SELECT *
+FROM aggregated
+LEFT JOIN gmb_locations USING (location_id)
