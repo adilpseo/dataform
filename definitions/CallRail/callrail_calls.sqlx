@@ -72,7 +72,7 @@ SELECT
   END AS is_booked,
 
   t.tracker_name,
-  t.water_heaters_only_locations,
+  t.water_only_tracker_location,
   t.water_only_traker_type
 
 FROM callrail.Calls c
