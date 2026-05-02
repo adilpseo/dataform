@@ -1,0 +1,62 @@
+config {
+  type: "table",
+  tags: ["daily"]
+}
+
+WITH accounts AS (
+  SELECT id, account_name
+  FROM waterheatersonly.account
+)
+
+SELECT
+  r.id AS review_id,
+  r.account_id,
+  r.location_id,
+  r.reviewer_display_name,
+  DATETIME(r.create_time) create_time,
+  DATETIME(r.review_reply_update_time) review_reply_update_time,
+  TIMESTAMP_DIFF(r.review_reply_update_time, r.create_time, SECOND) reply_in,
+  COALESCE(r.review_reply_update_time IS NOT NULL, FALSE) is_replied,
+  star_rating,
+  CASE 
+    WHEN star_rating = 'FIVE' THEN 5
+    WHEN star_rating = 'FOUR' THEN 4
+    WHEN star_rating = 'THREE' THEN 3
+    WHEN star_rating = 'TWO' THEN 2
+    WHEN star_rating = 'ONE' THEN 1
+  END AS rating,
+  REPEAT('⭐', 
+    CASE 
+      WHEN star_rating = 'FIVE' THEN 5
+      WHEN star_rating = 'FOUR' THEN 4
+      WHEN star_rating = 'THREE' THEN 3
+      WHEN star_rating = 'TWO' THEN 2
+      WHEN star_rating = 'ONE' THEN 1
+    END
+  ) AS stars,
+  r.comment,
+  r.review_reply_comment,
+  r.reviewer_profile_photo_url,
+
+  a.account_name,
+  
+  -- g.client_name,
+  -- g.clientkey,
+  -- g.lid,
+
+  l.title,
+  l.storefront_address_locality,
+  l.storefront_address_administrative_area,
+  REGEXP_REPLACE(l.storefront_address_lines, r'[\[\]"]', '') AS full_address,
+  l.website_uri,
+  l.primary_category_name,
+  l.primary_category_display_name,
+  l.open_info_status
+
+FROM waterheatersonly.review r
+-- LEFT JOIN ${ref("master_gmb_locations")} g ON g.gmb_location_id = r.location_id
+LEFT JOIN accounts a ON r.account_id = a.id
+LEFT JOIN waterheatersonly.location l ON r.location_id = l.id
+WHERE 
+  l._fivetran_deleted IS FALSE
+  AND r._fivetran_deleted IS FALSE
