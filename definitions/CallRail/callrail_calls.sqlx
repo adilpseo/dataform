@@ -71,7 +71,9 @@ SELECT
     ELSE 'Not Booked'
   END AS is_booked,
 
-  t.tracker_name
+  t.tracker_name,
+  t.water_heaters_only_locations,
+  t.water_only_traker_type
 
 FROM callrail.Calls c
 LEFT JOIN ${ref("callrail_call_tags")} USING (id, company_id)
