@@ -168,7 +168,7 @@ final AS (
     m.callrail_id,
     m.ad_spend_threshold,
     m.pct_ad_spend,
-    m.monthly_management_fee AS monthly_management_fee,
+    SAFE_DIVIDE(m.monthly_management_fee, count) AS monthly_management_fee,
     m.lsa_management_fee,
     m.est_lead_to_service_call_ratio,
     m.est_average_per_booked_call_transaction_value,
