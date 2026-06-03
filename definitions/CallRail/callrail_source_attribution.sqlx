@@ -45,9 +45,11 @@ SELECT
   END source_attribution,
 
   CASE
-    WHEN REGEXP_CONTAINS(TRIM(LOWER(tracker_name)), 'google') THEN 'Google'
-    WHEN REGEXP_CONTAINS(TRIM(LOWER(tracker_name)), 'bing') OR REGEXP_CONTAINS(TRIM(LOWER(tracker_name)), 'microsoft') THEN 'Microsoft'
-    WHEN REGEXP_CONTAINS(TRIM(LOWER(tracker_name)), 'facebook') THEN 'Facebook'
+    -- Word-bounded matches so e.g. 'Plumbing' (contains 'bing') doesn't get tagged Microsoft.
+    WHEN REGEXP_CONTAINS(LOWER(tracker_name), r'\bgoogle\b') THEN 'Google'
+    WHEN REGEXP_CONTAINS(LOWER(tracker_name), r'\bbing\b')
+      OR REGEXP_CONTAINS(LOWER(tracker_name), r'\bmicrosoft\b') THEN 'Microsoft'
+    WHEN REGEXP_CONTAINS(LOWER(tracker_name), r'\bfacebook\b') THEN 'Facebook'
     ELSE 'Others'
   END AS source_platform
 

@@ -17,38 +17,75 @@ WITH clients AS (
 bingads_accounts AS (
   SELECT DISTINCT id AS account_id, name AS account_title
   FROM bingads.account_history
+),
+
+bing_spend AS (
+  SELECT
+    b.account_id,
+    b.date,
+    b.campaign_id,
+    b.campaign_name,
+    b.campaign_status,
+    b.currency_code,
+    b.ad_distribution,
+
+    b.spend,
+    b.clicks,
+    b.impressions,
+    b.ctr,
+    b.conversions,
+    b.conversion_rate,
+    b.average_cpc,
+    b.average_position,
+    b.cost_per_conversion,
+
+    b.device_type,
+    b.device_os,
+
+    c.clientkey,
+    c.client_name,
+    c.lid,
+
+    a.account_title
+
+  FROM bingads.campaign_performance_daily_report b
+  JOIN bingads_accounts a USING (account_id)
+  JOIN clients c USING (account_id)
+),
+
+-- Used to divide day-grain call counts evenly across that day's Bing rows
+-- so SUM(calls_microsoft) in Looker still equals the true daily call total.
+-- Note: bingads.campaign_performance_daily_report is at finer-than-campaign grain
+-- (one row per campaign x device_type x device_os x ad_distribution), so we divide
+-- by the actual row count, not COUNT(DISTINCT campaign_id) — otherwise calls
+-- would be over-counted ~Nx where N is device/OS variants per campaign.
+spend_rows_per_day AS (
+  SELECT
+    account_id,
+    date,
+    COUNT(*) AS spend_rows
+  FROM bing_spend
+  GROUP BY 1, 2
+),
+
+-- All calls from CallRail trackers tagged as Microsoft platform (Bing/Microsoft Ads
+-- plus any Bing-organic tracker). The platform tag is set in callrail_source_attribution.
+daily_microsoft_calls AS (
+  SELECT
+    clientkey,
+    lid,
+    DATE(created_at) AS date,
+    COUNT(*) AS day_calls_microsoft
+  FROM ${ref('callrail_calls')}
+  WHERE source_platform = 'Microsoft'
+  GROUP BY 1, 2, 3
 )
 
-
 SELECT
-  b.account_id,
-  b.date,
-  b.campaign_id,
-  b.campaign_name,
-  b.campaign_status,
-  b.currency_code,
-  b.ad_distribution,
+  bs.*,
 
-  b.spend,
-  b.clicks,
-  b.impressions,
-  b.ctr,
-  b.conversions,
-  b.conversion_rate,
-  b.average_cpc,
-  b.average_position,
-  b.cost_per_conversion,
-  
-  b.device_type,
-  b.device_os,
+  SAFE_DIVIDE(dmc.day_calls_microsoft, srpd.spend_rows) AS calls_microsoft
 
-  c.clientkey,
-  c.client_name,
-  c.lid,
-
-  a.account_title,
-
-
-FROM bingads.campaign_performance_daily_report b
-JOIN bingads_accounts a USING (account_id)
-JOIN clients c USING (account_id)
+FROM bing_spend bs
+LEFT JOIN spend_rows_per_day srpd USING (account_id, date)
+LEFT JOIN daily_microsoft_calls dmc USING (clientkey, lid, date)
