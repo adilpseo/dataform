@@ -59,14 +59,21 @@ google_ads_spend AS (
   JOIN google_campaigns gc USING(customer_id, campaign_id)
 ),
 
-campaign_count AS (
+-- Count of non-LSA campaigns across ALL of the client's Google accounts for the day.
+-- calls_ppc / forms_ppc are divided by this so SUM() over the campaign rows equals
+-- the true daily total exactly once -- even when a client has multiple Google Ads
+-- accounts. (Previously the count was per customer_id, which multi-counted the daily
+-- call/form total once per account for clients with >1 Google account.)
+client_campaign_count AS (
     SELECT
-        date,
-        customer_id,
-        COUNT(DISTINCT campaign_id) AS campaigns
-    FROM google_ads_spend
-    WHERE advertising_channel_type != 'LOCAL_SERVICES'
-    GROUP BY 1,2
+        gi.clientkey,
+        gi.lid,
+        gs.date,
+        COUNT(DISTINCT CONCAT(CAST(gs.customer_id AS STRING), '-', CAST(gs.campaign_id AS STRING))) AS campaigns
+    FROM google_ads_spend gs
+    JOIN ${ref("google_ad_ids")} gi USING (customer_id)
+    WHERE gs.advertising_channel_type != 'LOCAL_SERVICES'
+    GROUP BY 1,2,3
 ),
 
 daily_calls_ppc AS (
@@ -105,7 +112,7 @@ FROM google_ads_spend AS gads
 LEFT JOIN ${ref("google_ad_ids")} c USING(customer_id)
 LEFT JOIN ${ref('google_ads_impressions')} i USING (campaign_id, date)
 
-LEFT JOIN campaign_count cc USING(customer_id, date)
+LEFT JOIN client_campaign_count cc USING(clientkey, lid, date)
 LEFT JOIN daily_calls_ppc dcp USING(clientkey, lid, date)
 LEFT JOIN daily_forms_ppc dcf USING(clientkey, lid, date)
 
