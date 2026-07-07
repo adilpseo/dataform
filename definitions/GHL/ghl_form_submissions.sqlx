@@ -17,7 +17,7 @@ WITH raw_data AS (
 )
 
 SELECT
-  d,
+  d.*,
   DATETIME(TIMESTAMP(d.createdAt), f.timezone) AS submitted_at,
   f.name AS form_name,
   f.locationId,
