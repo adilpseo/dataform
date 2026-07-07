@@ -12,12 +12,12 @@ WITH raw_data AS (
     others AS form_data,
     contactId,
     createdAt,
-    ROW_NUMBER() OVER (PARTITION BY id ORDER BY _airbyte_extracted_at DESC) rn
-  FROM ghl_data.Form_Submissions
+    -- ROW_NUMBER() OVER (PARTITION BY id ORDER BY _airbyte_extracted_at DESC) rn
+  FROM ghl_extract.Form_Submissions
 )
 
 SELECT
-  d.* EXCEPT(createdAt, rn),
+  d,
   DATETIME(TIMESTAMP(d.createdAt), f.timezone) AS submitted_at,
   f.name AS form_name,
   f.locationId,
@@ -40,6 +40,6 @@ SELECT
 FROM raw_data d
 LEFT JOIN ${ref('ghl_forms')} f ON d.formid = f.id
 LEFT JOIN ${ref('master_sheet')} m ON f.locationId = m.ghl_id
-WHERE rn = 1
+-- WHERE rn = 1
 
 -- AND submission_id = '680948d121b7a629fd7fab3b'

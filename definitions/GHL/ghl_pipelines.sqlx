@@ -9,15 +9,15 @@ WITH raw_pipelines AS (
     p.name,
     p.stages,
     o.locationId,
-    p._airbyte_extracted_at,
-    ROW_NUMBER() OVER(PARTITION BY p.id ORDER BY p._airbyte_extracted_at DESC) rn  
-  FROM ghl_data.Pipelines p
+    -- p._airbyte_extracted_at,
+    -- ROW_NUMBER() OVER(PARTITION BY p.id ORDER BY p._airbyte_extracted_at DESC) rn  
+  FROM ghl_extract.Pipelines p
   JOIN 
     (SELECT pipelineId, locationId 
-      FROM ghl_data.Opportunities
+      FROM ghl_extract.Opportunities
       GROUP BY pipelineId, locationId) o ON p.id = o.pipelineId
 )
 
 SELECT *
 FROM raw_pipelines
-WHERE rn = 1
+-- WHERE rn = 1

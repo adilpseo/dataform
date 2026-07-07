@@ -30,9 +30,9 @@ WITH raw_opps AS (
     ), 
     ','
     ) AS contact_tags,
-    _airbyte_extracted_at,
-    ROW_NUMBER() OVER(PARTITION BY id ORDER BY _airbyte_extracted_at DESC) rn
-  FROM ghl_data.Opportunities
+    -- _airbyte_extracted_at,
+    -- ROW_NUMBER() OVER(PARTITION BY id ORDER BY _airbyte_extracted_at DESC) rn
+  FROM ghl_extract.Opportunities
 )
 
 SELECT 
@@ -71,5 +71,5 @@ FROM raw_opps r
 JOIN ${ref("ghl_locations")} l ON r.locationId = l.id
 JOIN ${ref("ghl_pipeline_stages")} p ON r.pipelineStageId = p.stageId
 JOIN ${ref("master_sheet")} m ON r.locationId = m.ghl_id
-WHERE r.rn = 1
+-- WHERE r.rn = 1
 
